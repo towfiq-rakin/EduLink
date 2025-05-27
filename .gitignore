@@ -47,9 +47,8 @@ ehthumbs.db
 Thumbs.db
 
 # Project specific
-*.txt
 *.log
-result_analysis_report_*.txt
+
 
 # Temporary files
 *.tmp
