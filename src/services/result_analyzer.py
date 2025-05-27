@@ -281,7 +281,7 @@ class ResultAnalyzer:
             f.write("\n")
             
             # Subject-wise Analysis
-            f.write("SUBJECT-WISE ANALYSIS:\n")
+            f.write("RESULT-WISE ANALYSIS:\n")
             f.write("-"*40 + "\n")
             for subject, stats in report['subject_analysis'].items():
                 f.write(f"\n{subject}:\n")

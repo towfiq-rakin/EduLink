@@ -4,11 +4,11 @@ EDULINK - RESULT ANALYSIS REPORT
 
 GRADING SYSTEM:
 ----------------------------------------
-• Mid-term: 20 marks (scaled from 40)
-• Best 3 CT Average: 10 marks
-• Presentation: 10 marks
-• Attendance: 10 marks
-• Total: 50 marks
+ï¿½ Mid-term: 20 marks (scaled from 40)
+ï¿½ Best 3 CT Average: 10 marks
+ï¿½ Presentation: 10 marks
+ï¿½ Attendance: 10 marks
+ï¿½ Total: 50 marks
 
 BASIC STATISTICS:
 ----------------------------------------
@@ -97,7 +97,7 @@ No.  Student Name                        CT Avg   Mid    Pres   Att  Total  %   
 40   MD. SHOAIB                          7.33     14.0   8.0    9    38.3   76.67  A     
 41   MD. TAHMID ALAM                     8.83     14.0   8.0    9    39.8   79.67  A     
 
-SUBJECT-WISE ANALYSIS:
+EXAM-WISE ANALYSIS:
 ----------------------------------------
 
 CT1:
