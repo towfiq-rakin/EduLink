@@ -28,10 +28,8 @@ class ResultAnalyzer:
         if self.data is None:
             raise ValueError("Data not loaded. Please load the data first.")
         
-        # Create a copy for processing
         self.processed_data = self.data.copy()
         
-        # Handle 'A' (Absent) marks - replace with 0
         mark_columns = ['CT1', 'CT2', 'Mid-Term', 'CT3', 'CT4', 'Presentation']
         for col in mark_columns:
             if col in self.processed_data.columns:
@@ -44,31 +42,20 @@ class ResultAnalyzer:
         if self.processed_data is None:
             self.preprocess_data()
         
-        # New grading system:
-        # - Mid-term: 20 marks (scaled from 40 to 20)
-        # - Best 3 CTs average: 10 marks 
-        # - Presentation: 10 marks
-        # - Attendance: 10 marks
-        # Total: 50 marks
-        
-        # Calculate scaled midterm marks (half of original)
+
         self.processed_data['Midterm_Scaled'] = self.processed_data['Mid-Term'] / 2
         
-        # Calculate best 3 CT average
         ct_columns = ['CT1', 'CT2', 'CT3', 'CT4']
         ct_scores = []
         
         for index, row in self.processed_data.iterrows():
-            # Get CT scores for this student
             scores = [row[col] for col in ct_columns if col in self.processed_data.columns and pd.notna(row[col])]
-            # Sort and take best 3
             scores.sort(reverse=True)
             best_3_avg = sum(scores[:3]) / 3 if len(scores) >= 3 else (sum(scores) / len(scores) if scores else 0)
             ct_scores.append(best_3_avg)
         
         self.processed_data['Best_3_CT_Avg'] = ct_scores
         
-        # Calculate total marks obtained (out of 50)
         self.processed_data['Total_Obtained'] = (
             self.processed_data['Midterm_Scaled'] +  # 20 marks
             self.processed_data['Best_3_CT_Avg'] +   # 10 marks
@@ -76,7 +63,6 @@ class ResultAnalyzer:
             self.processed_data['Attendance']        # 10 marks
         )
         
-        # Calculate percentage (out of 50)
         self.processed_data['Percentage'] = (self.processed_data['Total_Obtained'] / 50) * 100
         
         return self.processed_data
@@ -132,33 +118,26 @@ class ResultAnalyzer:
         
         report = {}
         
-        # Basic statistics
         report['total_students'] = len(self.processed_data)
         report['average_percentage'] = self.processed_data['Percentage'].mean()
         report['highest_percentage'] = self.processed_data['Percentage'].max()
         report['lowest_percentage'] = self.processed_data['Percentage'].min()
         report['median_percentage'] = self.processed_data['Percentage'].median()
         
-        # Category-wise distribution
         category_distribution = self.processed_data['Category'].value_counts().to_dict()
         report['category_distribution'] = category_distribution
         
-        # Grade-wise distribution
         grade_distribution = self.processed_data['Grade'].value_counts().to_dict()
         report['grade_distribution'] = grade_distribution
         
-        # Top performers
         top_performers = self.processed_data.nlargest(5, 'Percentage')[['Student Name', 'Percentage', 'Grade']].to_dict('records')
         report['top_performers'] = top_performers
         
-        # Students needing attention (bottom 5)
         bottom_performers = self.processed_data.nsmallest(5, 'Percentage')[['Student Name', 'Percentage', 'Grade']].to_dict('records')
         report['students_needing_attention'] = bottom_performers
         
-        # Subject-wise analysis (updated for new system)
         subject_analysis = {}
         
-        # Individual CT analysis
         mark_columns = ['CT1', 'CT2', 'CT3', 'CT4']
         for col in mark_columns:
             if col in self.processed_data.columns:
@@ -169,7 +148,6 @@ class ResultAnalyzer:
                     'students_with_zero': (self.processed_data[col] == 0).sum()
                 }
         
-        # Best 3 CT average analysis
         subject_analysis['Best_3_CT_Average'] = {
             'average': self.processed_data['Best_3_CT_Avg'].mean(),
             'highest': self.processed_data['Best_3_CT_Avg'].max(),
@@ -177,7 +155,6 @@ class ResultAnalyzer:
             'students_with_zero': (self.processed_data['Best_3_CT_Avg'] == 0).sum()
         }
         
-        # Midterm (original and scaled)
         subject_analysis['Mid-Term_Original'] = {
             'average': self.processed_data['Mid-Term'].mean(),
             'highest': self.processed_data['Mid-Term'].max(),
