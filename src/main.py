@@ -1,12 +1,12 @@
 # Contents of /EduLink/EduLink/src/main.py
 
-import tkinter as tk
-from gui.main_window import MainWindow
+import customtkinter as ctk
+from src.gui.login import LoginWindow
 
 def main():
-    root = tk.Tk()
-    root.title("EduLink - Student Management App")
-    app = MainWindow(root)
+    root = ctk.CTk()
+    root.title("BUP EduLink")
+    app = LoginWindow(root)
     root.mainloop()
 
 if __name__ == "__main__":

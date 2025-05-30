@@ -1,0 +1,159 @@
+================================================================================
+EDULINK - RESULT ANALYSIS REPORT
+================================================================================
+
+GRADING SYSTEM:
+----------------------------------------
+• Mid-term: 20 marks (scaled from 40)
+• Best 3 CT Average: 10 marks
+• Presentation: 10 marks
+• Attendance: 10 marks
+• Total: 50 marks
+
+BASIC STATISTICS:
+----------------------------------------
+Total Students: 41
+Average Percentage: 82.19%
+Highest Percentage: 98.33%
+Lowest Percentage: 34.67%
+Median Percentage: 83.67%
+
+CATEGORY DISTRIBUTION:
+----------------------------------------
+Excellent: 25 students (61.0%)
+Good: 13 students (31.7%)
+Average: 2 students (4.9%)
+Poor: 1 students (2.4%)
+
+GRADE DISTRIBUTION:
+----------------------------------------
+Grade A: 10 students (24.4%)
+Grade A+: 25 students (61.0%)
+Grade A-: 1 students (2.4%)
+Grade B: 1 students (2.4%)
+Grade B+: 2 students (4.9%)
+Grade B-: 1 students (2.4%)
+Grade F: 1 students (2.4%)
+
+TOP 5 PERFORMERS:
+----------------------------------------
+1. SHREYA SARKER - 98.33% (Grade: A+)
+2. AFSANA HENA - 98.00% (Grade: A+)
+3. TOWFIQ OMAR RAKIN - 96.33% (Grade: A+)
+4. MARJIA KHATUN - 95.33% (Grade: A+)
+5. ABDULLAH AL - YAMIN - 95.00% (Grade: A+)
+
+STUDENTS NEEDING ATTENTION (Bottom 5):
+--------------------------------------------------
+1. FAIZA MUSTARI - 34.67% (Grade: F)
+2. MEHAR NIGAR ANONNA - 55.33% (Grade: B-)
+3. MASHRAFI ELAHI - 63.67% (Grade: B)
+4. GOLAM ALI KIBRIA - 69.00% (Grade: B+)
+5. SM SHAHRIER EMON - 69.67% (Grade: B+)
+
+ALL STUDENTS RESULTS:
+==========================================================================================
+No.  Student Name                        CT Avg   Mid    Pres   Att  Total  %      Grade 
+------------------------------------------------------------------------------------------
+1    LUTFUL AHMED NADIM                  7.00     16.0   7.5    9    39.5   79.00  A     
+2    AFSANA HENA                         10.00    20.0   9.0    10   49.0   98.00  A+    
+3    M TASDIK MUTTAKI                    8.67     18.0   8.0    10   44.7   89.33  A+    
+4    REHNUMA SALSABIL BINTE OBAYED       9.67     17.5   8.0    10   45.2   90.33  A+    
+5    MISHA MALIHA                        9.33     20.0   6.5    10   45.8   91.67  A+    
+6    MD. TAHMIDUR RAHMAN KHAN            9.17     17.0   8.0    9    43.2   86.33  A+    
+7    FAIZA MUSTARI                       4.33     0.0    5.0    8    17.3   34.67  F     
+8    GOLAM ALI KIBRIA                    4.50     14.0   8.0    8    34.5   69.00  B+    
+9    MD. MAINUL ISLAM                    8.33     17.5   7.5    9    42.3   84.67  A+    
+10   MD.JONAEID KABIR SHANTO             6.50     16.5   7.5    9    39.5   79.00  A     
+11   SAROWAR HOSSAIN RONY                6.83     18.5   6.0    9    40.3   80.67  A+    
+12   FAIYAZ KAMRUL KHAN                  8.17     16.0   7.5    9    40.7   81.33  A+    
+13   TASHFIN RUAID                       7.33     18.5   7.5    9    42.3   84.67  A+    
+14   AL SADIQUE NUHIN                    8.50     17.0   7.5    9    42.0   84.00  A+    
+15   MD. JUNAYET HOSSAIN MOHIT           9.33     20.0   8.0    10   47.3   94.67  A+    
+16   MARJIA KHATUN                       9.67     20.0   8.0    10   47.7   95.33  A+    
+17   ABDULLAH AL - YAMIN                 9.50     20.0   8.0    10   47.5   95.00  A+    
+18   ABDULLAH MAHMUD YAMIN               8.83     19.5   8.0    9    45.3   90.67  A+    
+19   SUMAIYA HOSSAIN ANIKA               9.50     18.5   7.0    10   45.0   90.00  A+    
+20   MD. RAISUL ISLAM                    7.33     15.5   8.0    9    39.8   79.67  A     
+21   SM SHAHRIER EMON                    5.83     14.5   6.5    8    34.8   69.67  B+    
+22   FARHAN ISRAQ JAMI                   9.00     14.5   8.0    9    40.5   81.00  A+    
+23   IFTHEKHAR AHMED                     8.00     16.0   8.5    9    41.5   83.00  A+    
+24   SHREYA SARKER                       9.67     20.0   9.5    10   49.2   98.33  A+    
+25   MD.MUSFIQUR RAHMAN SAMA             8.33     11.5   8.0    9    36.8   73.67  A-    
+26   MD. MEHEDI HASAN FOYSAL             5.83     16.0   8.0    8    37.8   75.67  A     
+27   MIHIR BORMON                        8.50     17.5   8.0    9    43.0   86.00  A+    
+28   JANNATUL SHANJIMOM AURPY            9.17     12.5   7.5    9    38.2   76.33  A     
+29   RAIHANUL HASAN KHAN                 8.33     16.5   8.0    9    41.8   83.67  A+    
+30   ABDUL HAKIM SHIFAT                  9.00     19.0   8.0    9    45.0   90.00  A+    
+31   TOWFIQ OMAR RAKIN                   9.67     20.0   8.5    10   48.2   96.33  A+    
+32   TAHIA ZAIMA                         8.17     14.0   8.0    9    39.2   78.33  A     
+33   ABID HASAN ZIDEN                    8.83     18.0   8.0    9    43.8   87.67  A+    
+34   MASHRAFI ELAHI                      6.83     9.5    7.5    8    31.8   63.67  B     
+35   ZARIN TASNIM RAHMAN TULY            8.67     12.0   8.0    9    37.7   75.33  A     
+36   MD. ALVEE AHNAF KHAN                7.50     16.5   6.0    9    39.0   78.00  A     
+37   SHAHED SHAHRIER                     7.83     19.0   9.0    9    44.8   89.67  A+    
+38   NUZHAT SAIMA                        9.33     20.0   7.5    10   46.8   93.67  A+    
+39   MEHAR NIGAR ANONNA                  6.67     7.0    6.0    8    27.7   55.33  B-    
+40   MD. SHOAIB                          7.33     14.0   8.0    9    38.3   76.67  A     
+41   MD. TAHMID ALAM                     8.83     14.0   8.0    9    39.8   79.67  A     
+
+RESULT-WISE ANALYSIS:
+----------------------------------------
+
+CT1:
+  Average: 7.10
+  Highest: 10.00
+  Lowest: 2.00
+  Absent/Zero marks: 0 students
+
+CT2:
+  Average: 6.46
+  Highest: 10.00
+  Lowest: 0.00
+  Absent/Zero marks: 2 students
+
+CT3:
+  Average: 7.33
+  Highest: 10.00
+  Lowest: 0.00
+  Absent/Zero marks: 1 students
+
+CT4:
+  Average: 8.76
+  Highest: 10.00
+  Lowest: 0.00
+  Absent/Zero marks: 2 students
+
+Best_3_CT_Average:
+  Average: 8.14
+  Highest: 10.00
+  Lowest: 4.33
+  Absent/Zero marks: 0 students
+
+Mid-Term_Original:
+  Average: 32.29
+  Highest: 40.00
+  Lowest: 0.00
+  Absent/Zero marks: 1 students
+
+Mid-Term_Scaled:
+  Average: 16.15
+  Highest: 20.00
+  Lowest: 0.00
+  Absent/Zero marks: 1 students
+
+Presentation:
+  Average: 7.68
+  Highest: 9.50
+  Lowest: 5.00
+  Absent/Zero marks: 0 students
+
+Attendance:
+  Average: 9.12
+  Highest: 10.00
+  Lowest: 8.00
+  Absent/Zero marks: 0 students
+
+================================================================================
+Report generated on: 2025-05-29 17:01:58
+================================================================================

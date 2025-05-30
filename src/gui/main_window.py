@@ -1,4 +1,6 @@
 import customtkinter as ctk
+import ttkbootstrap as ttkb
+from ttkbootstrap.constants import *
 import os
 import sys
 
