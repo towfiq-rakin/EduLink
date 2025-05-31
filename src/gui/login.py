@@ -2,8 +2,8 @@ import tkinter as tk
 import customtkinter as ctk
 from PIL import Image, ImageTk
 import os
-
 from ..services import accounts_db
+from src.gui.teachers_menu import TeachersMenu
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
@@ -77,20 +77,56 @@ class LoginWindow:
         )
         self.login_button.place(x=50, y=215)
 
-        self.register_button = ctk.CTkButton(master=self.frame, width=220, text="Don't have an account? Register")
-        self.register_button.place(x=50, y=260)
+        self.forget_label = ctk.CTkLabel(master=self.frame, text="Don't have an account? ", font=('Century Gothic', 12))
+        self.forget_label.place(x=50, y=260)
+
+        self.register_button = ctk.CTkButton(
+            master=self.frame,
+            width=70,
+            text="Register",
+            text_color="skyblue",
+            fg_color="transparent",
+        )
+        self.register_button.place(x=200, y=260)
 
     def login(self):
         username = self.username_entry.get()
         password = self.pass_entry.get()
         if not username or not password:
-            self.status_label.configure(text="Please enter both username and password", text_color="red")
+            # new pop up Warning window to the user to fill in both fields
+            warning_window = ctk.CTkToplevel(self.master)
+            warning_window.title("Warning")
+            warning_window.geometry("300x100+600+400")
+            warning_window.resizable(False, False)
+            warning_window.configure(bg_color="darkgray")
+            warning_window.lift()  # Bring to front
+            warning_window.attributes("-topmost", True)  # Always on top
+            warning_label = ctk.CTkLabel(warning_window, text="Please fill in both fields.", text_color="red")
+            warning_label.pack(pady=10)
+            close_button = ctk.CTkButton(warning_window, text="Close", command=warning_window.destroy)
+            close_button.pack(pady=10)
             return
         usertype = accounts_db.validate_login(username, password)
         if usertype:
-            self.status_label.configure(text=f"Login successful as {usertype}", text_color="green")
+            # Call the TeachersMenu class if usertype is 'teacher'
+            if usertype == 'teacher':
+                self.master.destroy()
+                root = ctk.CTk()
+                app = TeachersMenu(root)
+                root.mainloop()
         else:
-            self.status_label.configure(text="Invalid username or password", text_color="red")
+            warning_window2 = ctk.CTkToplevel(self.master)
+            warning_window2.title("Warning")
+            warning_window2.geometry("300x100+600+400")
+            warning_window2.resizable(False, False)
+            warning_window2.configure(bg_color="darkgray")
+            warning_window2.lift()  # Bring to front
+            warning_window2.attributes("-topmost", True)  # Always on top
+            warning_label = ctk.CTkLabel(warning_window2, text="Wrong username or password", text_color="red")
+            warning_label.pack(pady=10)
+            close_button = ctk.CTkButton(warning_window2, text="Close", command=warning_window2.destroy)
+            close_button.pack(pady=10)
+            return
 
 if __name__ == "__main__":
     root = ctk.CTk()
