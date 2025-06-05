@@ -1,12 +1,19 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime
+import matplotlib.pyplot as plt
+import os
+import seaborn as sns
 
 class ResultAnalyzer:
     def __init__(self, data_file):
-        self.data_file = data_file
+        self.data_file = os.path.normpath(data_file)  # Normalize path
         self.data = None
         self.processed_data = None
+        # Use os.path.abspath to get absolute path and normalize it
+        root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        self.output_dir = os.path.join(root_dir, 'output')
+        os.makedirs(self.output_dir, exist_ok=True)
 
     def load_data(self):
         """Load data from CSV or Excel file"""
@@ -30,7 +37,12 @@ class ResultAnalyzer:
         
         self.processed_data = self.data.copy()
         
-        mark_columns = ['CT1', 'CT2', 'Mid-Term', 'CT3', 'CT4', 'Presentation']
+        # Ensure 'Attendance' column exists, or add it with default values
+        if 'Attendance' not in self.processed_data.columns:
+            # Default attendance of 8 out of 10 for demonstration
+            self.processed_data['Attendance'] = 8
+        
+        mark_columns = ['CT1', 'CT2', 'Mid-Term', 'CT3', 'CT4', 'Presentation', 'Attendance']
         for col in mark_columns:
             if col in self.processed_data.columns:
                 self.processed_data[col] = pd.to_numeric(self.processed_data[col], errors='coerce').fillna(0)
@@ -42,7 +54,7 @@ class ResultAnalyzer:
         if self.processed_data is None:
             self.preprocess_data()
         
-
+        # Scale Mid-Term from 40 to 20
         self.processed_data['Midterm_Scaled'] = self.processed_data['Mid-Term'] / 2
         
         ct_columns = ['CT1', 'CT2', 'CT3', 'CT4']
@@ -55,6 +67,14 @@ class ResultAnalyzer:
             ct_scores.append(best_3_avg)
         
         self.processed_data['Best_3_CT_Avg'] = ct_scores
+        
+        # Ensure all required columns exist before calculation
+        for col in ['Midterm_Scaled', 'Best_3_CT_Avg', 'Presentation', 'Attendance']:
+            if col not in self.processed_data.columns:
+                if col == 'Attendance':
+                    self.processed_data[col] = 8  # Default value
+                else:
+                    self.processed_data[col] = 0  # Default value
         
         self.processed_data['Total_Obtained'] = (
             self.processed_data['Midterm_Scaled'] +  # 20 marks
@@ -69,6 +89,8 @@ class ResultAnalyzer:
 
     def categorize_students(self):
         """Categorize students based on their performance"""
+        if self.processed_data is None:
+            self.preprocess_data()
         if 'Percentage' not in self.processed_data.columns:
             self.calculate_total_and_percentage()
         
@@ -369,3 +391,197 @@ class ResultAnalyzer:
             return report
         else:
             raise ValueError("Data not loaded. Please load the data first.")
+
+    def generate_graphs(self):
+        """Generate various graphs and charts for analysis"""
+        if self.processed_data is None:
+            self.categorize_students()
+        
+        report = self.generate_detailed_report()
+        
+        # Create output directory if it doesn't exist
+        os.makedirs(self.output_dir, exist_ok=True)
+        
+        # Set style for better-looking graphs
+        plt.style.use('default')  # Using default style instead of seaborn
+        
+        # Generate all visualizations
+        self._create_grade_distribution(report)
+        self._create_performance_analysis()
+        self._create_assessment_breakdown()
+        self._create_attendance_analysis()
+        self._create_comparative_analysis()
+        
+        return self.output_dir
+
+    def _create_grade_distribution(self, report):
+        """Create pie chart for grade distribution"""
+        plt.figure(figsize=(10, 8))
+        grades = list(report['grade_distribution'].keys())
+        values = list(report['grade_distribution'].values())
+        colors = plt.cm.Pastel1(np.linspace(0, 1, len(grades)))
+        plt.pie(values, labels=grades, autopct='%1.1f%%', colors=colors)
+        plt.title('Grade Distribution', pad=20, fontsize=14)
+        plt.savefig(os.path.join(self.output_dir, 'grade_distribution.png'), 
+                   bbox_inches='tight', dpi=300)
+        plt.close()
+
+    def _create_performance_analysis(self):
+        """Create line graph for student performance distribution"""
+        plt.figure(figsize=(12, 6))
+        sorted_data = self.processed_data.sort_values('Percentage', ascending=False)
+        plt.plot(range(len(sorted_data)), sorted_data['Percentage'], 
+                'b-', linewidth=2, color='#2196F3')
+        plt.fill_between(range(len(sorted_data)), sorted_data['Percentage'], 
+                        alpha=0.3, color='#2196F3')
+        plt.title('Overall Performance Distribution', pad=20, fontsize=14)
+        plt.xlabel('Student Rank')
+        plt.ylabel('Percentage')
+        plt.grid(True, alpha=0.3)
+        plt.savefig(os.path.join(self.output_dir, 'performance_distribution.png'), 
+                   bbox_inches='tight', dpi=300)
+        plt.close()
+
+    def _create_assessment_breakdown(self):
+        """Create box plot for assessment score distribution"""
+        plt.figure(figsize=(12, 6))
+        components = ['CT1', 'CT2', 'CT3', 'CT4', 'Mid-Term']
+        box_data = [self.processed_data[comp] for comp in components]
+        
+        bp = plt.boxplot(box_data, labels=components, patch_artist=True)
+        
+        # Customize box plot colors
+        for box in bp['boxes']:
+            box.set(facecolor='#4CAF50', alpha=0.7)
+        
+        plt.title('Assessment Score Distribution', pad=20, fontsize=14)
+        plt.ylabel('Marks')
+        plt.grid(True, alpha=0.3)
+        plt.savefig(os.path.join(self.output_dir, 'assessment_distribution.png'), 
+                   bbox_inches='tight', dpi=300)
+        plt.close()
+
+    def _create_attendance_analysis(self):
+        """Create scatter plot for attendance vs performance correlation"""
+        plt.figure(figsize=(10, 6))
+        plt.scatter(self.processed_data['Attendance'], 
+                   self.processed_data['Percentage'],
+                   alpha=0.6, c='#FF9800')
+        
+        plt.title('Attendance vs Overall Performance', pad=20, fontsize=14)
+        plt.xlabel('Attendance Score')
+        plt.ylabel('Overall Percentage')
+        plt.grid(True, alpha=0.3)
+        plt.savefig(os.path.join(self.output_dir, 'attendance_correlation.png'), 
+                   bbox_inches='tight', dpi=300)
+        plt.close()
+
+    def _create_comparative_analysis(self):
+        """Create stacked bar chart for component-wise score distribution"""
+        plt.figure(figsize=(12, 6))
+        components = ['Best_3_CT_Avg', 'Midterm_Scaled', 'Presentation', 'Attendance']
+        colors = ['#2196F3', '#4CAF50', '#FFC107', '#FF5722']
+        
+        bottom = np.zeros(len(self.processed_data))
+        for component, color in zip(components, colors):
+            plt.bar(range(len(self.processed_data)), 
+                   self.processed_data[component], 
+                   bottom=bottom, 
+                   label=component,
+                   alpha=0.7,
+                   color=color)
+            bottom += self.processed_data[component]
+        
+        plt.title('Score Component Distribution', pad=20, fontsize=14)
+        plt.xlabel('Student Index')
+        plt.ylabel('Marks')
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+        plt.tight_layout()
+        plt.savefig(os.path.join(self.output_dir, 'component_distribution.png'), 
+                   bbox_inches='tight', dpi=300)
+        plt.close()
+
+    def _create_grade_progression(self):
+        """Create line chart showing grade progression across assessments"""
+        plt.figure(figsize=(12, 6))
+        assessments = ['CT1', 'CT2', 'CT3', 'CT4', 'Mid-Term']
+        for _, student in self.processed_data.iterrows():
+            scores = [student[assessment] for assessment in assessments]
+            plt.plot(assessments, scores, alpha=0.3)
+        
+        plt.title('Grade Progression Across Assessments')
+        plt.xlabel('Assessment Type')
+        plt.ylabel('Scores')
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        plt.savefig(os.path.join(self.output_dir, 'grade_progression.png'))
+        plt.close()
+
+    def _create_ct_performance_box(self):
+        """Create box plot for CT performance distribution"""
+        plt.figure(figsize=(10, 6))
+        ct_data = [self.processed_data[f'CT{i}'] for i in range(1, 5)]
+        plt.boxplot(ct_data, labels=[f'CT{i}' for i in range(1, 5)])
+        plt.title('CT Performance Distribution')
+        plt.ylabel('Scores')
+        plt.tight_layout()
+        plt.savefig(os.path.join(self.output_dir, 'ct_performance_box.png'))
+        plt.close()
+
+    def _create_student_performance_line(self):
+        """Create line chart of overall student performance"""
+        plt.figure(figsize=(15, 6))
+        sorted_data = self.processed_data.sort_values('Percentage', ascending=False)
+        plt.plot(range(len(sorted_data)), sorted_data['Percentage'], marker='o')
+        plt.title('Student Performance Distribution')
+        plt.xlabel('Student Rank')
+        plt.ylabel('Overall Percentage')
+        plt.grid(True)
+        plt.tight_layout()
+        plt.savefig(os.path.join(self.output_dir, 'student_performance_line.png'))
+        plt.close()
+
+    def _create_component_contribution_stacked(self):
+        """Create stacked bar chart showing contribution of each component"""
+        plt.figure(figsize=(12, 6))
+        components = ['Best_3_CT_Avg', 'Midterm_Scaled', 'Presentation', 'Attendance']
+        
+        bottom = np.zeros(len(self.processed_data))
+        for component in components:
+            plt.bar(range(len(self.processed_data)), 
+                   self.processed_data[component], 
+                   bottom=bottom, 
+                   label=component)
+            bottom += self.processed_data[component]
+        
+        plt.title('Component-wise Score Distribution')
+        plt.xlabel('Student Index')
+        plt.ylabel('Scores')
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(os.path.join(self.output_dir, 'component_contribution.png'))
+        plt.close()
+
+    def _create_top_bottom_comparison(self, report):
+        """Create comparative bar chart for top and bottom performers"""
+        plt.figure(figsize=(12, 6))
+        
+        # Get top and bottom 5 students
+        top_5 = report['top_performers']
+        bottom_5 = report['students_needing_attention']
+        
+        # Prepare data
+        names = ([student['Student Name'] for student in top_5] + 
+                [student['Student Name'] for student in bottom_5])
+        scores = ([student['Percentage'] for student in top_5] + 
+                 [student['Percentage'] for student in bottom_5])
+        colors = ['green']*5 + ['red']*5
+        
+        # Create bar chart
+        plt.bar(range(len(names)), scores, color=colors)
+        plt.xticks(range(len(names)), names, rotation=45, ha='right')
+        plt.title('Top 5 vs Bottom 5 Performers')
+        plt.ylabel('Overall Percentage')
+        plt.tight_layout()
+        plt.savefig(os.path.join(self.output_dir, 'top_bottom_comparison.png'))
+        plt.close()
