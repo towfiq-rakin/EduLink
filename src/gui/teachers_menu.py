@@ -80,7 +80,7 @@ class TeachersMenu:
             
             # Generate graphs
             output_dir = self.analyzer.generate_graphs()
-            
+            self.analyzer.save_report_to_file()
             self.status_label.configure(
                 text=f"Analysis complete! Graphs saved to: {output_dir}", 
                 text_color="#4CAF50"

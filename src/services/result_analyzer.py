@@ -36,11 +36,7 @@ class ResultAnalyzer:
             raise ValueError("Data not loaded. Please load the data first.")
         
         self.processed_data = self.data.copy()
-        
-        # Ensure 'Attendance' column exists, or add it with default values
-        if 'Attendance' not in self.processed_data.columns:
-            # Default attendance of 8 out of 10 for demonstration
-            self.processed_data['Attendance'] = 8
+
         
         mark_columns = ['CT1', 'CT2', 'Mid-Term', 'CT3', 'CT4', 'Presentation', 'Attendance']
         for col in mark_columns:
@@ -158,33 +154,33 @@ class ResultAnalyzer:
         bottom_performers = self.processed_data.nsmallest(5, 'Percentage')[['Student Name', 'Percentage', 'Grade']].to_dict('records')
         report['students_needing_attention'] = bottom_performers
         
-        subject_analysis = {}
+        exam_analysis = {}
         
         mark_columns = ['CT1', 'CT2', 'CT3', 'CT4']
         for col in mark_columns:
             if col in self.processed_data.columns:
-                subject_analysis[col] = {
+                exam_analysis[col] = {
                     'average': self.processed_data[col].mean(),
                     'highest': self.processed_data[col].max(),
                     'lowest': self.processed_data[col].min(),
                     'students_with_zero': (self.processed_data[col] == 0).sum()
                 }
         
-        subject_analysis['Best_3_CT_Average'] = {
+        exam_analysis['Best_3_CT_Avg'] = {
             'average': self.processed_data['Best_3_CT_Avg'].mean(),
             'highest': self.processed_data['Best_3_CT_Avg'].max(),
             'lowest': self.processed_data['Best_3_CT_Avg'].min(),
             'students_with_zero': (self.processed_data['Best_3_CT_Avg'] == 0).sum()
         }
         
-        subject_analysis['Mid-Term_Original'] = {
+        exam_analysis['Mid-Term_Original'] = {
             'average': self.processed_data['Mid-Term'].mean(),
             'highest': self.processed_data['Mid-Term'].max(),
             'lowest': self.processed_data['Mid-Term'].min(),
             'students_with_zero': (self.processed_data['Mid-Term'] == 0).sum()
         }
         
-        subject_analysis['Mid-Term_Scaled'] = {
+        exam_analysis['Mid-Term'] = {
             'average': self.processed_data['Midterm_Scaled'].mean(),
             'highest': self.processed_data['Midterm_Scaled'].max(),
             'lowest': self.processed_data['Midterm_Scaled'].min(),
@@ -194,14 +190,14 @@ class ResultAnalyzer:
         # Presentation and Attendance
         for col in ['Presentation', 'Attendance']:
             if col in self.processed_data.columns:
-                subject_analysis[col] = {
+                exam_analysis[col] = {
                     'average': self.processed_data[col].mean(),
                     'highest': self.processed_data[col].max(),
                     'lowest': self.processed_data[col].min(),
                     'students_with_zero': (self.processed_data[col] == 0).sum()
                 }
         
-        report['subject_analysis'] = subject_analysis
+        report['exam_analysis'] = exam_analysis
         
         return report
 
@@ -280,9 +276,9 @@ class ResultAnalyzer:
             f.write("\n")
             
             # Subject-wise Analysis
-            f.write("RESULT-WISE ANALYSIS:\n")
+            f.write("EXAM-WISE ANALYSIS:\n")
             f.write("-"*40 + "\n")
-            for subject, stats in report['subject_analysis'].items():
+            for subject, stats in report['exam_analysis'].items():
                 f.write(f"\n{subject}:\n")
                 f.write(f"  Average: {stats['average']:.2f}\n")
                 f.write(f"  Highest: {stats['highest']:.2f}\n")
@@ -363,7 +359,7 @@ class ResultAnalyzer:
         # Subject-wise Analysis
         print("\nSUBJECT-WISE ANALYSIS:")
         print("-"*40)
-        for subject, stats in report['subject_analysis'].items():
+        for subject, stats in report['exam_analysis'].items():
             print(f"\n{subject}:")
             print(f"  Average: {stats['average']:.2f}")
             print(f"  Highest: {stats['highest']:.2f}")
@@ -411,7 +407,8 @@ class ResultAnalyzer:
         self._create_assessment_breakdown()
         self._create_attendance_analysis()
         self._create_comparative_analysis()
-        
+        self._create_grade_progression()
+        self._create_exam_wise_analysis()
         return self.output_dir
 
     def _create_grade_distribution(self, report):
@@ -419,11 +416,52 @@ class ResultAnalyzer:
         plt.figure(figsize=(10, 8))
         grades = list(report['grade_distribution'].keys())
         values = list(report['grade_distribution'].values())
-        colors = plt.cm.Pastel1(np.linspace(0, 1, len(grades)))
-        plt.pie(values, labels=grades, autopct='%1.1f%%', colors=colors)
+        # colors = plt.cm.Pastel1(np.linspace(0, 1, len(grades)))
+        plt.pie(values, labels=grades, autopct='%1.1f%%')
         plt.title('Grade Distribution', pad=20, fontsize=14)
         plt.savefig(os.path.join(self.output_dir, 'grade_distribution.png'), 
                    bbox_inches='tight', dpi=300)
+        plt.close()
+
+    def _create_exam_wise_analysis(self):
+        """Create bar chart for exam-wise analysis with visible lowest marks"""
+        plt.figure(figsize=(12, 6))
+        exam_analysis = self.generate_detailed_report()['exam_analysis']
+
+        exams = list(exam_analysis.keys())
+        exams.remove('Mid-Term_Original')  # Exclude original mid-term for clarity
+        averages = [exam_analysis[subj]['average'] for subj in exams]
+        highest = [exam_analysis[subj]['highest'] for subj in exams]
+        lowest = [exam_analysis[subj]['lowest'] for subj in exams]
+        x = np.arange(len(exams))
+        width = 0.25
+        bars1 = plt.bar(x - width, averages, width, label='Average', color='#2196F3')
+        bars2 = plt.bar(x, highest, width, label='Highest', color='#4CAF50')
+        bars3 = plt.bar(x + width, lowest, width, label='Lowest', color='#FF9800')
+
+        plt.xticks(x, exams)
+        plt.title('Exam-wise Analysis', pad=20, fontsize=14)
+        plt.xlabel('Exams')
+        plt.ylabel('Marks')
+        plt.legend()
+        plt.ylim(-1, max(highest) + 2)  # Set y-axis lower limit to -1
+
+        # Add value labels for lowest marks
+        for bar in bars3:
+            height = bar.get_height()
+            plt.text(bar.get_x() + bar.get_width() / 2, height + 0.1, f'{height:.1f}',
+                     ha='center', va='bottom', fontsize=9, color='#FF9800')
+        for bar in bars1:
+            height = bar.get_height()
+            plt.text(bar.get_x() + bar.get_width() / 2, height + 0.1, f'{height:.1f}',
+                     ha='center', va='bottom', fontsize=9, color='#2196F3')
+        for bar in bars2:
+            height = bar.get_height()
+            plt.text(bar.get_x() + bar.get_width() / 2, height + 0.1, f'{height:.1f}',
+                     ha='center', va='bottom', fontsize=9, color='#4CAF50')
+
+        plt.savefig(os.path.join(self.output_dir, 'exam_analysis.png'),
+                    bbox_inches='tight', dpi=300)
         plt.close()
 
     def _create_performance_analysis(self):
