@@ -3,7 +3,6 @@ import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
 import os
-import seaborn as sns
 
 class ResultAnalyzer:
     def __init__(self, data_file):
@@ -206,10 +205,11 @@ class ResultAnalyzer:
         if filename is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"result_analysis_report_{timestamp}.txt"
-        
+
+        filepath = os.path.join(self.output_dir, filename)
         report = self.generate_detailed_report()
         
-        with open(filename, 'w') as f:
+        with open(filepath, 'w') as f:
             f.write("="*80 + "\n")
             f.write("EDULINK - RESULT ANALYSIS REPORT\n")
             f.write("="*80 + "\n\n")
@@ -290,7 +290,7 @@ class ResultAnalyzer:
             f.write("="*80 + "\n")
         
         print(f"Report saved to: {filename}")
-        return filename
+        return filepath
 
     def print_report_to_terminal(self):
         """Print the report to terminal"""
