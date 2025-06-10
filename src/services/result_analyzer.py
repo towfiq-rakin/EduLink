@@ -405,14 +405,57 @@ class ResultAnalyzer:
         self._create_grade_distribution(report)
         self._create_performance_analysis()
         self._create_assessment_breakdown()
-        self._create_attendance_analysis()
+        # self._create_attendance_analysis()
         self._create_comparative_analysis()
-        self._create_grade_progression()
+        # self._create_grade_progression()
         self._create_exam_wise_analysis()
+        self._basic_stat_graph()
         return self.output_dir
 
+    def _basic_stat_graph(self):
+        # Create bar chart for basic statistics
+        plt.figure(figsize=(10, 6))
+        report = self.generate_detailed_report()
+
+        categories = ['Average', 'Highest', 'Lowest', 'Median']
+        percentage_values = [report['average_percentage'], report['highest_percentage'],
+                  report['lowest_percentage'], report['median_percentage']]
+        total_marks = {
+            'Average': self.processed_data['Total_Obtained'].mean(),
+            'Highest': self.processed_data['Total_Obtained'].max(),
+            'Lowest': self.processed_data['Total_Obtained'].min(),
+            'Median': self.processed_data['Total_Obtained'].median()
+        }
+        # Extract values from total_marks in the same order as categories
+        total_marks_values = [total_marks[cat] for cat in categories]
+
+        # Create a grouped bar chart for percentage and total marks
+        x = np.arange(len(categories))
+        width = 0.35  # Width of the bars
+        bar1 = plt.bar(x - width/2, total_marks_values, width, label='Total Marks', color='#2196F3')
+        bar2 = plt.bar(x + width/2, percentage_values, width, label='Percentage', color='#4CAF50')
+        plt.xticks(x, categories)
+        plt.title('Basic Statistics of Student Performance', pad=20, fontsize=14)
+        plt.xlabel('Statistics')
+        plt.ylabel('Marks / Percentage')
+        plt.legend()
+        for bar in bar1:
+            height = bar.get_height()
+            plt.text(bar.get_x() + bar.get_width() / 2, height + 0.1, f'{height:.2f}',
+                     ha='center', va='bottom', fontsize=9, color='#2196F3')
+
+        for bar in bar2:
+            height = bar.get_height()
+            plt.text(bar.get_x() + bar.get_width() / 2, height + 0.1, f'{height:.2f}',
+                     ha='center', va='bottom', fontsize=9, color='#4CAF50')
+
+        plt.savefig(os.path.join(self.output_dir, 'basic_statistics.png'),
+                   bbox_inches='tight', dpi=300)
+        plt.close()
+
+
     def _create_grade_distribution(self, report):
-        """Create pie chart for grade distribution"""
+        # Create pie chart for grade distribution
         plt.figure(figsize=(10, 8))
         grades = list(report['grade_distribution'].keys())
         values = list(report['grade_distribution'].values())
