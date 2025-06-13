@@ -3,6 +3,7 @@ import os
 import tkinter as tk
 from PIL import Image, ImageTk
 from src.services.result_analyzer import ResultAnalyzer
+from src.services.cluster_analyzer import ClusterAnalyzer
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
@@ -38,6 +39,14 @@ class TeachersMenu:
         )
         self.analyze_button.pack(side="left", padx=10, pady=10)
         
+        self.cluster_button = ctk.CTkButton(
+            self.control_panel,
+            text="Cluster Analysis",
+            command=self.perform_cluster_analysis,
+            font=('Century Gothic', 14)
+        )
+        self.cluster_button.pack(side="left", padx=10, pady=10)
+
         self.view_reports_button = ctk.CTkButton(
             self.control_panel, 
             text="View Reports", 
@@ -62,7 +71,8 @@ class TeachersMenu:
         # Path to the result file
         self.dataset_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'result.csv')
         self.analyzer = ResultAnalyzer(self.dataset_path)
-        
+        self.cluster_analyzer = ClusterAnalyzer(self.dataset_path)
+
         # Check if data exists
         if not os.path.exists(self.dataset_path):
             self.status_label.configure(text="Error: Result file not found", text_color="#F44336")
@@ -90,7 +100,121 @@ class TeachersMenu:
                 text="Error: Could not load data from file", 
                 text_color="#F44336"
             )
-    
+
+    def perform_cluster_analysis(self):
+        """Perform cluster analysis on the results"""
+        self.status_label.configure(text="Performing cluster analysis...", text_color="#FFC107")
+        self.master.update()
+
+        # Run the full cluster analysis
+        results = self.cluster_analyzer.run_full_analysis(n_clusters=3)
+
+        if results['success']:
+            self.status_label.configure(
+                text="Cluster analysis complete! View the results in Reports.",
+                text_color="#4CAF50"
+            )
+
+            # Show the cluster visualization immediately
+            self.display_cluster_results(results)
+        else:
+            self.status_label.configure(
+                text="Error: Could not complete cluster analysis",
+                text_color="#F44336"
+            )
+
+    def display_cluster_results(self, results):
+        """Display the cluster analysis results"""
+        # Clear previous content
+        for widget in self.reports_container.winfo_children():
+            widget.destroy()
+
+        # Create header
+        header = ctk.CTkLabel(
+            self.reports_container,
+            text="Student Performance Clustering Results",
+            font=('Century Gothic', 18, 'bold')
+        )
+        header.pack(pady=15)
+
+        # Create container for cluster visualization
+        viz_frame = ctk.CTkFrame(self.reports_container)
+        viz_frame.pack(fill="x", pady=10, padx=10)
+
+        # Display cluster visualization
+        if results['cluster_plot']:
+            self.display_image(viz_frame, results['cluster_plot'], max_height=400)
+
+        # Create container for statistics
+        stats_frame = ctk.CTkFrame(self.reports_container)
+        stats_frame.pack(fill="x", pady=10, padx=10)
+
+        # Display statistics for each group
+        if results['statistics']:
+            stats_header = ctk.CTkLabel(
+                stats_frame,
+                text="Group Statistics",
+                font=('Century Gothic', 16, 'bold')
+            )
+            stats_header.pack(pady=10)
+
+            for group, stats in results['statistics'].items():
+                group_frame = ctk.CTkFrame(stats_frame)
+                group_frame.pack(fill="x", pady=5, padx=10)
+
+                group_label = ctk.CTkLabel(
+                    group_frame,
+                    text=f"{group} Group ({stats['count']} students)",
+                    font=('Century Gothic', 14, 'bold')
+                )
+                group_label.pack(pady=5)
+
+                stats_text = (
+                    f"Average Score: {stats['avg_score']:.2f} | "
+                    f"Range: {stats['min_score']:.2f} - {stats['max_score']:.2f}"
+                )
+                stats_label = ctk.CTkLabel(
+                    group_frame,
+                    text=stats_text,
+                    font=('Century Gothic', 12)
+                )
+                stats_label.pack(pady=5)
+
+                # Show top students in this group
+                if stats['students']:
+                    student_text = "Top Students: " + ", ".join(
+                        [f"{s['name']} ({s['total']:.1f})" for s in stats['students'][:5]]
+                    )
+                    student_label = ctk.CTkLabel(
+                        group_frame,
+                        text=student_text,
+                        font=('Century Gothic', 12),
+                        wraplength=800
+                    )
+                    student_label.pack(pady=5, padx=10)
+
+        # Add buttons to view full reports
+        buttons_frame = ctk.CTkFrame(self.reports_container)
+        buttons_frame.pack(fill="x", pady=10, padx=10)
+
+        if results['report_file']:
+            report_button = ctk.CTkButton(
+                buttons_frame,
+                text="View Full Report",
+                command=lambda: self.open_file_externally(results['report_file']),
+                font=('Century Gothic', 12)
+            )
+            report_button.pack(side="left", padx=10, pady=10)
+
+        if results['csv_file']:
+            csv_button = ctk.CTkButton(
+                buttons_frame,
+                text="View CSV Data",
+                command=lambda: self.open_file_externally(results['csv_file']),
+                font=('Century Gothic', 12)
+            )
+            csv_button.pack(side="left", padx=10, pady=10)
+
     def view_reports(self):
         """View the generated reports and graphs"""
         # Clear previous content
@@ -183,3 +307,18 @@ class TeachersMenu:
                 subprocess.call(['xdg-open', img_path])
         except Exception as e:
             print(f"Error opening image externally: {e}")
+
+    def open_file_externally(self, file_path):
+        """Open a file with the default application"""
+        import subprocess
+        import platform
+
+        try:
+            if platform.system() == 'Windows':
+                os.startfile(file_path)
+            elif platform.system() == 'Darwin':  # macOS
+                subprocess.call(['open', file_path])
+            else:  # Linux
+                subprocess.call(['xdg-open', file_path])
+        except Exception as e:
+            print(f"Error opening file: {e}")
