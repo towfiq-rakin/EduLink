@@ -2,8 +2,8 @@ import tkinter as tk
 import customtkinter as ctk
 from PIL import Image, ImageTk
 import os
-from ..services import accounts_db
-from src.gui.teachers_menu import TeachersMenu
+from services import accounts_db
+from gui.teachers_menu import TeachersMenu
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")

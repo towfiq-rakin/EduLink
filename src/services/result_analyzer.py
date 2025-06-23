@@ -203,8 +203,7 @@ class ResultAnalyzer:
     def save_report_to_file(self, filename=None):
         """Save the detailed report to a text file"""
         if filename is None:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"result_analysis_report_{timestamp}.txt"
+            filename = "result_analysis_report.txt"
 
         filepath = os.path.join(self.output_dir, filename)
         report = self.generate_detailed_report()

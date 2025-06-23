@@ -1,0 +1,53 @@
+================================================================================
+EDULINK - CLUSTER ANALYSIS REPORT
+================================================================================
+
+CLUSTER SUMMARY:
+----------------------------------------
+Total Students: 81
+Number of Clusters: 3
+Cluster Labels: Good, Average, Struggling
+
+
+GOOD GROUP STATISTICS:
+----------------------------------------
+Number of Students: 55
+Average Total Score: 79.03
+Score Range: 62.67 - 89.17
+
+Top 5 Students in this Group:
+1. MD. ABU ZIHAD - Total Score: 89.17
+2. SHREYA SARKER - Total Score: 89.17
+3. AFSANA HENA - Total Score: 89.00
+4. ABRAR ZAHIN - Total Score: 88.83
+5. TOWFIQ OMAR RAKIN - Total Score: 88.67
+
+AVERAGE GROUP STATISTICS:
+----------------------------------------
+Number of Students: 10
+Average Total Score: 66.47
+Score Range: 54.50 - 73.00
+
+Top 5 Students in this Group:
+1. IFTHEKHAR AHMED - Total Score: 73.00
+2. LUTFUL AHMED NADIM - Total Score: 71.50
+3. MASNOON TAHIM SIJAN - Total Score: 71.17
+4. MD. ALVEE AHNAF KHAN - Total Score: 71.00
+5. MD. TAHMID ALAM - Total Score: 67.83
+
+STRUGGLING GROUP STATISTICS:
+----------------------------------------
+Number of Students: 16
+Average Total Score: 51.95
+Score Range: 19.33 - 67.17
+
+Top 5 Students in this Group:
+1. SHAZZAD HOSSAN LABIB - Total Score: 67.17
+2. SM SHAHRIER EMON - Total Score: 65.83
+3. GOLAM ALI KIBRIA - Total Score: 64.50
+4. MD. TAMJID AHMAD EMON - Total Score: 61.67
+5. MD. MOSTAFIZUR RAHAMAN SHUVO - Total Score: 58.83
+
+================================================================================
+Report generated on: 2025-06-23 14:03:50
+================================================================================

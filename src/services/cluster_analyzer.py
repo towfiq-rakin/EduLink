@@ -19,7 +19,6 @@ class ClusterAnalyzer:
         root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         self.output_dir = os.path.join(root_dir, 'output')
         os.makedirs(self.output_dir, exist_ok=True)
-        self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     def load_data(self, index_col=0, fill_na_value=0):
         """
@@ -166,7 +165,7 @@ class ClusterAnalyzer:
             plt.legend()
             plt.grid(alpha=0.3)
 
-            plot_path = os.path.join(self.output_dir, f"student_clusters_{self.timestamp}.png")
+            plot_path = os.path.join(self.output_dir, f"student_clusters.png")
             plt.savefig(plot_path, bbox_inches='tight', dpi=300)
             plt.close()
 
@@ -187,7 +186,7 @@ class ClusterAnalyzer:
             if self.processed_data is None:
                 raise ValueError("Clustering has not been performed. Please perform clustering first.")
 
-            results_path = os.path.join(self.output_dir, f"student_analysis_{self.timestamp}.csv")
+            results_path = os.path.join(self.output_dir, f"student_analysis.csv")
             self.processed_data.to_csv(results_path)
             print(f"Clustering results saved to: {results_path}")
             return results_path
@@ -256,7 +255,7 @@ class ClusterAnalyzer:
         if self.processed_data is None:
             raise ValueError("Clustering has not been performed. Please perform clustering first.")
 
-        report_path = os.path.join(self.output_dir, f"cluster_analysis_report_{self.timestamp}.txt")
+        report_path = os.path.join(self.output_dir, f"cluster_analysis_report.txt")
 
         with open(report_path, 'w') as f:
             f.write("="*80 + "\n")
