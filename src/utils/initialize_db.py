@@ -8,6 +8,7 @@ root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 sys.path.append(root_dir)
 
 from src.utils.db_utils import DatabaseManager
+from src.utils.import_grades import import_grades_to_db
 
 def initialize_database():
     """
@@ -50,6 +51,9 @@ def initialize_database():
             print("Failed to import grade data.")
             return False
         print("Grade information successfully set up.")
+        # Import student grades and allocate scholarships
+        print("Importing student grades and processing scholarships...")
+        import_grades_to_db()
 
         print("Database initialization completed successfully!")
         return True

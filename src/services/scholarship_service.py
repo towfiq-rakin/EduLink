@@ -1,53 +1,51 @@
-import os
 from sklearn.tree import DecisionTreeClassifier
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 import random
-from src.utils.helpers import get_data_dir, get_output_dir
+import os
+from src.utils.db_utils import DatabaseManager
+from src.utils.helpers import get_output_dir
 
 class ScholarshipService:
     def __init__(self):
         self.model = DecisionTreeClassifier()
         self.total_budget = 0
-        # Use the correct Excel file directly
-        self.data_file = os.path.join(get_data_dir(), 'CSE-23-3rd-Semester.xlsx')
+        # Database will be used to load student grades
+        self.db_manager = DatabaseManager()
 
     def load_and_prepare_data(self):
-        """Load and prepare data directly from Excel file"""
-        try:
-            # Read the raw Excel file
-            df = pd.read_excel(self.data_file)
+        """Load and prepare data from the student_grades table in the database"""
+        # Connect to database
+        self.db_manager.connect()
+        # Ensure student_grades table exists
+        create_table = '''
+        CREATE TABLE IF NOT EXISTS student_grades (
+            student_id TEXT PRIMARY KEY,
+            name TEXT,
+            sgpa REAL,
+            cgpa REAL
+        )
+        '''
+        self.db_manager.execute_query(create_table)
+        self.db_manager.connection.commit()
+        query = "SELECT student_id AS Student_ID, name AS Name, sgpa AS SGPA FROM student_grades"
+        df = pd.read_sql_query(query, self.db_manager.connection)
+        self.db_manager.disconnect()
 
-            # Find the header row
-            header_row = df[df['Unnamed: 3'] == 'Student ID'].index[0]
+        # Ensure SGPA is numeric and valid
+        df['SGPA'] = pd.to_numeric(df['SGPA'], errors='coerce')
+        df = df.dropna(subset=['SGPA'])
+        df = df[df['SGPA'] <= 4.0]
 
-            # Read Excel file again with correct header
-            df = pd.read_excel(self.data_file, skiprows=header_row)
+        # Add random monthly income between 10000 and 100000
+        df['monthly_income'] = [random.randint(10000, 100000) for _ in range(len(df))]
 
-            # Create clean DataFrame with required columns
-            processed_df = pd.DataFrame({
-                'Student_ID': df['Unnamed: 3'],
-                'Name': df['Unnamed: 4'],
-                'SGPA': pd.to_numeric(df['Unnamed: 66'], errors='coerce'),  # Current semester GPA
-            })
+        # Sort by SGPA in descending order
+        df = df.sort_values('SGPA', ascending=False)
 
-            # Remove any rows with invalid SGPA
-            processed_df = processed_df.dropna(subset=['SGPA'])
-            processed_df = processed_df[processed_df['SGPA'] <= 4.0]
-
-            # Add random monthly income between 10000 and 100000
-            processed_df['monthly_income'] = [random.randint(10000, 100000) for _ in range(len(processed_df))]
-
-            # Sort by SGPA in descending order to process higher grades first
-            processed_df = processed_df.sort_values('SGPA', ascending=False)
-
-            print("\nProcessed data sample:")
-            print(processed_df[['Student_ID', 'Name', 'SGPA']].head())
-            return processed_df
-
-        except Exception as e:
-            raise ValueError(f"Error processing Excel file: {str(e)}")
+        print("\nSample of loaded student grades:")
+        print(df[['Student_ID', 'Name', 'SGPA']].head())
+        return df
 
     def determine_scholarship_amount(self, sgpa, monthly_income):
         """
