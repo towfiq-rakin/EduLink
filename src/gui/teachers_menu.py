@@ -348,12 +348,42 @@ class TeachersMenu:
             if not self.result_analyzer.load_data():
                 raise Exception("Failed to load data")
 
+            # Process data and properly handle presentation marks
             self.result_analyzer.preprocess_data()
             results = self.result_analyzer.calculate_total_and_percentage()
             self.result_analyzer.categorize_students()
 
-            # Generate graphs
+            # Check if presentation data is present in the original data
+            if 'Presentation' in results.columns:
+                print(f"Presentation data found. Sample values: {results['Presentation'].head()}")
+            elif 'presentation' in results.columns:
+                print(f"Lowercase presentation column found, mapping to Presentation")
+                results['Presentation'] = results['presentation']
+            else:
+                print("Warning: No presentation column found. Adding default values.")
+                # If no presentation data is found, add a message to the UI
+                self.status_label.configure(text="Warning: Presentation data missing. Using default values.")
+
+            # Force recalculation of total with presentation included
+            results['Total_Obtained'] = (
+                results['Midterm_Scaled'] +  # 20 marks
+                results['Best_3_CT_Avg'] +   # 10 marks
+                results['Presentation'] +    # 10 marks
+                results['Attendance']        # 10 marks
+            )
+
+            results['Percentage'] = (results['Total_Obtained'] / 50) * 100
+
+            # Debug output to verify presentation data is included
+            print(f"First 5 rows of processed data:")
+            print(results[['Student Name', 'Best_3_CT_Avg', 'Midterm_Scaled', 'Presentation', 'Attendance', 'Total_Obtained']].head())
+
+            # Update the processed data with correct values
+            self.result_analyzer.processed_data = results
+
+            # Generate graphs and report
             self.result_analyzer.generate_graphs()
+            self.result_analyzer.save_report_to_file()
 
             # Clear loading frame
             loading_frame.destroy()
@@ -366,14 +396,28 @@ class TeachersMenu:
             )
             header.pack(pady=20)
 
+            # Add button to view full text report
+            report_btn_frame = ctk.CTkFrame(self.results_area, fg_color="transparent")
+            report_btn_frame.pack(fill="x", pady=(0, 20), padx=20)
+
+            view_report_btn = ctk.CTkButton(
+                report_btn_frame,
+                text="View Full Text Report",
+                command=self.show_text_report,
+                font=('Century Gothic', 14),
+                fg_color="#4CAF50",
+                hover_color="#388E3C",
+                width=200
+            )
+            view_report_btn.pack(pady=10)
+
             # Display visualizations - Updated to show all generated graphs
             viz_paths = {
                 'Grade Distribution': 'grade_distribution.png',
-                'Performance Distribution': 'performance_distribution.png',
-                'Assessment Distribution': 'assessment_distribution.png',
                 'Component Distribution': 'component_distribution.png',
                 'Basic Statistics': 'basic_statistics.png',
-                'Exam Analysis': 'exam_analysis.png'
+                'Exam Analysis': 'exam_analysis.png',
+                'Top vs Bottom Student': 'top_bottom_comparison.png'
             }
 
             output_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'output')
@@ -394,7 +438,6 @@ class TeachersMenu:
                     self.display_image(section_frame, img_path, max_height=500)
 
             self.status_label.configure(text="Analysis complete! Check the graphs above.")
-            self.result_analyzer.save_report_to_file()
 
         except Exception as e:
             self.status_label.configure(text=f"Error during analysis: {str(e)}")
@@ -997,3 +1040,92 @@ class TeachersMenu:
             close_btn.pack(side="left", padx=10)
         except Exception as e:
             self.status_label.configure(text=f"Error exporting data: {str(e)}")
+
+    def show_text_report(self):
+        """Display the full text report in a new window"""
+        try:
+            # Generate the report if it doesn't exist yet
+            output_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'output')
+            report_path = os.path.join(output_dir, "result_analysis_report.txt")
+
+            # If report doesn't exist, generate it
+            if not os.path.exists(report_path):
+                self.result_analyzer.save_report_to_file()
+
+            # Create a new toplevel window
+            report_window = ctk.CTkToplevel(self.master)
+            report_window.title("Full Result Analysis Report")
+            report_window.geometry("900x700")
+            report_window.grab_set()  # Make the window modal
+
+            # Create a frame for the report content
+            frame = ctk.CTkFrame(report_window)
+            frame.pack(fill="both", expand=True, padx=20, pady=20)
+
+            # Add a header
+            header = ctk.CTkLabel(
+                frame,
+                text="Complete Result Analysis Report",
+                font=('Century Gothic', 20, 'bold')
+            )
+            header.pack(pady=(10, 20))
+
+            # Create a scrollable text widget to display the report
+            text_container = ctk.CTkScrollableFrame(frame)
+            text_container.pack(fill="both", expand=True, padx=10, pady=10)
+
+            # Read the report file
+            with open(report_path, 'r') as f:
+                report_text = f.read()
+
+            # Display the report in a text widget with monospaced font
+            text_widget = ctk.CTkTextbox(text_container, width=800, height=500, font=("Courier New", 12))
+            text_widget.pack(fill="both", expand=True, padx=5, pady=5)
+            text_widget.insert("1.0", report_text)
+            text_widget.configure(state="disabled")  # Make it read-only
+
+            # Add buttons at the bottom
+            button_frame = ctk.CTkFrame(report_window, fg_color="transparent")
+            button_frame.pack(pady=15)
+
+            # Open in external app button
+            open_btn = ctk.CTkButton(
+                button_frame,
+                text="Open in External App",
+                command=lambda: self.open_file_externally(report_path),
+                width=150,
+                font=('Century Gothic', 12)
+            )
+            open_btn.pack(side="left", padx=10)
+
+            # Copy to clipboard button
+            copy_btn = ctk.CTkButton(
+                button_frame,
+                text="Copy to Clipboard",
+                command=lambda: self.copy_to_clipboard(report_text),
+                width=150,
+                font=('Century Gothic', 12)
+            )
+            copy_btn.pack(side="left", padx=10)
+
+            # Close button
+            close_btn = ctk.CTkButton(
+                button_frame,
+                text="Close",
+                command=report_window.destroy,
+                width=100,
+                font=('Century Gothic', 12)
+            )
+            close_btn.pack(side="left", padx=10)
+
+        except Exception as e:
+            self.status_label.configure(text=f"Error showing report: {str(e)}")
+
+    def copy_to_clipboard(self, text):
+        """Copy text to clipboard"""
+        try:
+            self.master.clipboard_clear()
+            self.master.clipboard_append(text)
+            self.status_label.configure(text="Report copied to clipboard successfully!")
+        except Exception as e:
+            self.status_label.configure(text=f"Error copying to clipboard: {str(e)}")
