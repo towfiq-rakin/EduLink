@@ -3,10 +3,11 @@ import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
 import os
+from src.utils.db_utils import DatabaseManager
 
 class ResultAnalyzer:
-    def __init__(self, data_file):
-        self.data_file = os.path.normpath(data_file)  # Normalize path
+    def __init__(self, data_file=None):
+        self.data_file = os.path.normpath(data_file) if data_file else None  # Normalize path
         self.data = None
         self.processed_data = None
         # Use os.path.abspath to get absolute path and normalize it
@@ -14,17 +15,54 @@ class ResultAnalyzer:
         self.output_dir = os.path.join(root_dir, 'output')
         os.makedirs(self.output_dir, exist_ok=True)
 
+        # Initialize database manager
+        self.db_manager = DatabaseManager()
+
     def load_data(self):
-        """Load data from CSV or Excel file"""
+        """Load data from database or CSV file"""
         try:
-            if self.data_file.endswith('.csv'):
-                self.data = pd.read_csv(self.data_file)
-            elif self.data_file.endswith(('.xls', '.xlsx')):
-                self.data = pd.read_excel(self.data_file)
+            # First try to load from database
+            if self.db_manager.connect():
+                students = self.db_manager.get_all_students()
+                if students:
+                    # Convert the list of dictionaries to a DataFrame
+                    self.data = pd.DataFrame(students)
+                    # Rename columns to match expected format
+                    column_mapping = {
+                        'student_name': 'Student Name',
+                        'mid_term': 'Mid-Term',
+                        'presentation': 'Presentation',  # Explicitly map presentation column
+                        'best_3_CT_avg': 'Best_3_CT_Avg',
+                        'midterm_scaled': 'Midterm_Scaled',
+                        'total_obtained': 'Total_Obtained'
+                    }
+                    self.data.rename(columns=column_mapping, inplace=True)
+
+                    # Print column names to verify presentation column
+                    print(f"Columns after mapping: {self.data.columns.tolist()}")
+                    if 'Presentation' in self.data.columns:
+                        print(f"Presentation values found: {self.data['Presentation'].head(5)}")
+                    elif 'presentation' in self.data.columns:
+                        print(f"Lowercase presentation column found, mapping to Presentation")
+                        self.data['Presentation'] = self.data['presentation']
+
+                    print("Data loaded successfully from database")
+                    self.db_manager.disconnect()
+                    return True
+                self.db_manager.disconnect()
+
+            # If database loading fails, fall back to CSV file
+            if self.data_file and os.path.exists(self.data_file):
+                if self.data_file.endswith('.csv'):
+                    self.data = pd.read_csv(self.data_file)
+                elif self.data_file.endswith(('.xls', '.xlsx')):
+                    self.data = pd.read_excel(self.data_file)
+                else:
+                    raise ValueError("Unsupported file format. Please provide a CSV or Excel file.")
+                print(f"Data loaded successfully from {self.data_file}")
+                return True
             else:
-                raise ValueError("Unsupported file format. Please provide a CSV or Excel file.")
-            print(f"Data loaded successfully from {self.data_file}")
-            return True
+                raise ValueError("No data source available. Database is empty and CSV file not found.")
         except Exception as e:
             print(f"Error loading data: {e}")
             return False
@@ -36,12 +74,22 @@ class ResultAnalyzer:
         
         self.processed_data = self.data.copy()
 
-        
+        # Make sure column names are consistent - ensure 'Presentation' is properly capitalized
+        if 'presentation' in self.processed_data.columns and 'Presentation' not in self.processed_data.columns:
+            self.processed_data['Presentation'] = self.processed_data['presentation']
+
         mark_columns = ['CT1', 'CT2', 'Mid-Term', 'CT3', 'CT4', 'Presentation', 'Attendance']
         for col in mark_columns:
             if col in self.processed_data.columns:
                 self.processed_data[col] = pd.to_numeric(self.processed_data[col], errors='coerce').fillna(0)
-        
+                print(f"Processed {col}: Min={self.processed_data[col].min()}, Max={self.processed_data[col].max()}, Mean={self.processed_data[col].mean()}")
+
+        # Debug output to check presentation data
+        if 'Presentation' in self.processed_data.columns:
+            print(f"Presentation data sample: {self.processed_data['Presentation'].head()}")
+        else:
+            print(f"Warning: Presentation column not found. Available columns: {self.processed_data.columns.tolist()}")
+
         return self.processed_data
 
     def calculate_total_and_percentage(self):
@@ -203,8 +251,7 @@ class ResultAnalyzer:
     def save_report_to_file(self, filename=None):
         """Save the detailed report to a text file"""
         if filename is None:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"result_analysis_report_{timestamp}.txt"
+            filename = "result_analysis_report.txt"
 
         filepath = os.path.join(self.output_dir, filename)
         report = self.generate_detailed_report()
@@ -403,11 +450,12 @@ class ResultAnalyzer:
         
         # Generate all visualizations
         self._create_grade_distribution(report)
-        self._create_performance_analysis()
         self._create_assessment_breakdown()
-        # self._create_attendance_analysis()
+        self._create_top_bottom_comparison(report)
         self._create_comparative_analysis()
         # self._create_grade_progression()
+        self._create_ct_performance_box()
+        # self._create_student_performance_line()
         self._create_exam_wise_analysis()
         self._basic_stat_graph()
         return self.output_dir
@@ -456,7 +504,7 @@ class ResultAnalyzer:
 
     def _create_grade_distribution(self, report):
         # Create pie chart for grade distribution
-        plt.figure(figsize=(10, 8))
+        plt.figure(figsize=(12, 10))
         grades = list(report['grade_distribution'].keys())
         values = list(report['grade_distribution'].values())
         # colors = plt.cm.Pastel1(np.linspace(0, 1, len(grades)))
@@ -526,19 +574,47 @@ class ResultAnalyzer:
     def _create_assessment_breakdown(self):
         """Create box plot for assessment score distribution"""
         plt.figure(figsize=(12, 6))
-        components = ['CT1', 'CT2', 'CT3', 'CT4', 'Mid-Term']
+        # Changed components to include the main assessment components used in final calculation
+        components = ['Best_3_CT_Avg', 'Midterm_Scaled', 'Presentation', 'Attendance']
         box_data = [self.processed_data[comp] for comp in components]
         
         bp = plt.boxplot(box_data, labels=components, patch_artist=True)
         
-        # Customize box plot colors
-        for box in bp['boxes']:
-            box.set(facecolor='#4CAF50', alpha=0.7)
-        
+        # Customize box plot colors with a more distinct color palette
+        colors = ['#2196F3', '#4CAF50', '#FFC107', '#FF5722']
+        for box, color in zip(bp['boxes'], colors):
+            box.set(facecolor=color, alpha=0.7)
+
         plt.title('Assessment Score Distribution', pad=20, fontsize=14)
         plt.ylabel('Marks')
         plt.grid(True, alpha=0.3)
-        plt.savefig(os.path.join(self.output_dir, 'assessment_distribution.png'), 
+
+        # Add a note about the components' contribution to total
+        plt.annotate('Components used in final grade calculation',
+                    xy=(0.5, 0.02),
+                    xycoords='figure fraction',
+                    ha='center',
+                    fontsize=10)
+
+        # Add data labels showing median values
+        for i, (comp, color) in enumerate(zip(components, colors)):
+            # Get median value
+            median = np.median(box_data[i])
+            # Get upper and lower quartiles
+            q1 = np.percentile(box_data[i], 25)
+            q3 = np.percentile(box_data[i], 75)
+
+            # Add median label
+            plt.text(i+1.15, median, f'Median: {median:.2f}',
+                    verticalalignment='center', color=color, fontweight='bold')
+
+            # Add quartile labels
+            plt.text(i+1.15, q3, f'Q3: {q3:.2f}',
+                    verticalalignment='center', color=color, fontsize=9)
+            plt.text(i+1.15, q1, f'Q1: {q1:.2f}',
+                    verticalalignment='center', color=color, fontsize=9)
+
+        plt.savefig(os.path.join(self.output_dir, 'assessment_distribution.png'),
                    bbox_inches='tight', dpi=300)
         plt.close()
 
@@ -601,12 +677,47 @@ class ResultAnalyzer:
     def _create_ct_performance_box(self):
         """Create box plot for CT performance distribution"""
         plt.figure(figsize=(10, 6))
-        ct_data = [self.processed_data[f'CT{i}'] for i in range(1, 5)]
-        plt.boxplot(ct_data, labels=[f'CT{i}' for i in range(1, 5)])
-        plt.title('CT Performance Distribution')
+        ct_columns = [f'CT{i}' for i in range(1, 5)]
+        ct_data = [self.processed_data[col] for col in ct_columns if col in self.processed_data.columns]
+
+        # Create the boxplot
+        bp = plt.boxplot(ct_data, labels=ct_columns[:len(ct_data)], patch_artist=True)
+
+        # Customize box colors
+        colors = ['#3498db', '#2ecc71', '#e74c3c', '#f39c12']
+        for i, box in enumerate(bp['boxes']):
+            box.set(facecolor=colors[i], alpha=0.7)
+
+        plt.title('CT Performance Distribution', pad=20, fontsize=14)
         plt.ylabel('Scores')
+        plt.grid(True, alpha=0.3)
+
+        # Add labels for statistics
+        for i, col in enumerate(ct_columns[:len(ct_data)]):
+            if col in self.processed_data.columns:
+                # Calculate statistics
+                median = np.median(ct_data[i])
+                mean = np.mean(ct_data[i])
+                max_val = np.max(ct_data[i])
+                min_val = np.min(ct_data[i])
+
+                # Position text for each CT to the right of the box
+                x_pos = i + 1.25
+
+                # Add labels with various statistics
+                plt.text(x_pos, median, f'Median: {median:.2f}',
+                        verticalalignment='center', color=colors[i], fontweight='bold')
+                plt.text(x_pos, mean, f'Mean: {mean:.2f}',
+                        verticalalignment='center', color=colors[i])
+                plt.text(x_pos, max_val, f'Max: {max_val:.2f}',
+                        verticalalignment='bottom', color=colors[i], fontsize=9)
+                plt.text(x_pos, min_val, f'Min: {min_val:.2f}',
+                        verticalalignment='top', color=colors[i], fontsize=9)
+
+        # Adjust layout to make room for labels
         plt.tight_layout()
-        plt.savefig(os.path.join(self.output_dir, 'ct_performance_box.png'))
+        plt.savefig(os.path.join(self.output_dir, 'ct_performance_box.png'),
+                    bbox_inches='tight', dpi=300)
         plt.close()
 
     def _create_student_performance_line(self):
@@ -659,7 +770,20 @@ class ResultAnalyzer:
         colors = ['green']*5 + ['red']*5
         
         # Create bar chart
-        plt.bar(range(len(names)), scores, color=colors)
+        bars = plt.bar(range(len(names)), scores, color=colors)
+
+        # Add value labels on top of each bar
+        for i, bar in enumerate(bars):
+            height = bar.get_height()
+            # Different colors for top 5 vs bottom 5
+            text_color = 'darkgreen' if i < 5 else 'darkred'
+            plt.text(bar.get_x() + bar.get_width()/2, height + 0.5,
+                    f'{scores[i]:.2f}%',
+                    ha='center', va='bottom',
+                    fontsize=9,
+                    fontweight='bold',
+                    color=text_color)
+
         plt.xticks(range(len(names)), names, rotation=45, ha='right')
         plt.title('Top 5 vs Bottom 5 Performers')
         plt.ylabel('Overall Percentage')

@@ -19,7 +19,6 @@ class ClusterAnalyzer:
         root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         self.output_dir = os.path.join(root_dir, 'output')
         os.makedirs(self.output_dir, exist_ok=True)
-        self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     def load_data(self, index_col=0, fill_na_value=0):
         """
@@ -166,7 +165,7 @@ class ClusterAnalyzer:
             plt.legend()
             plt.grid(alpha=0.3)
 
-            plot_path = os.path.join(self.output_dir, f"student_clusters_{self.timestamp}.png")
+            plot_path = os.path.join(self.output_dir, f"student_clusters.png")
             plt.savefig(plot_path, bbox_inches='tight', dpi=300)
             plt.close()
 
@@ -187,7 +186,7 @@ class ClusterAnalyzer:
             if self.processed_data is None:
                 raise ValueError("Clustering has not been performed. Please perform clustering first.")
 
-            results_path = os.path.join(self.output_dir, f"student_analysis_{self.timestamp}.csv")
+            results_path = os.path.join(self.output_dir, f"student_analysis.csv")
             self.processed_data.to_csv(results_path)
             print(f"Clustering results saved to: {results_path}")
             return results_path
@@ -256,7 +255,7 @@ class ClusterAnalyzer:
         if self.processed_data is None:
             raise ValueError("Clustering has not been performed. Please perform clustering first.")
 
-        report_path = os.path.join(self.output_dir, f"cluster_analysis_report_{self.timestamp}.txt")
+        report_path = os.path.join(self.output_dir, f"cluster_analysis_report.txt")
 
         with open(report_path, 'w') as f:
             f.write("="*80 + "\n")
@@ -278,11 +277,15 @@ class ClusterAnalyzer:
                 f.write(f"Average Total Score: {group_df['Total'].mean():.2f}\n")
                 f.write(f"Score Range: {group_df['Total'].min():.2f} - {group_df['Total'].max():.2f}\n")
 
-                # Top 5 students in the group
-                f.write("\nTop 5 Students in this Group:\n")
-                top_students = group_df.sort_values('Total', ascending=False).head(5)
-                for i, (_, student) in enumerate(top_students.iterrows(), 1):
-                    f.write(f"{i}. {student['Student Name']} - Total Score: {student['Total']:.2f}\n")
+                # Show all students in the group sorted by total score
+                f.write("\nAll Students in this Group (Sorted by Total Score):\n")
+                f.write("-"*70 + "\n")
+                f.write(f"{'No.':<4} {'Student Name':<35} {'Total Score':<12}\n")
+                f.write("-"*70 + "\n")
+
+                all_students = group_df.sort_values('Total', ascending=False)
+                for i, (_, student) in enumerate(all_students.iterrows(), 1):
+                    f.write(f"{i:<4} {student['Student Name']:<35} {student['Total']:.2f}\n")
 
             f.write("\n" + "="*80 + "\n")
             f.write(f"Report generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")

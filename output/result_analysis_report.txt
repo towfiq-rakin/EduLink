@@ -1,0 +1,202 @@
+================================================================================
+EDULINK - RESULT ANALYSIS REPORT
+================================================================================
+
+GRADING SYSTEM:
+----------------------------------------
+• Mid-term: 20 marks (scaled from 40)
+• Best 3 CT Average: 10 marks
+• Presentation: 10 marks
+• Attendance: 10 marks
+• Total: 50 marks
+
+BASIC STATISTICS:
+----------------------------------------
+Total Students: 81
+Average Percentage: 78.73%
+Highest Percentage: 94.33%
+Lowest Percentage: 34.67%
+Median Percentage: 80.00%
+
+CATEGORY DISTRIBUTION:
+----------------------------------------
+Excellent: 41 students (50.6%)
+Good: 33 students (40.7%)
+Average: 5 students (6.2%)
+Below Average: 1 students (1.2%)
+Poor: 1 students (1.2%)
+
+GRADE DISTRIBUTION:
+----------------------------------------
+Grade A: 15 students (18.5%)
+Grade A+: 41 students (50.6%)
+Grade A-: 10 students (12.3%)
+Grade B: 2 students (2.5%)
+Grade B+: 8 students (9.9%)
+Grade B-: 1 students (1.2%)
+Grade C: 1 students (1.2%)
+Grade C+: 2 students (2.5%)
+Grade F: 1 students (1.2%)
+
+TOP 5 PERFORMERS:
+----------------------------------------
+1. MD. ABU ZIHAD - 94.33% (Grade: A+)
+2. SHREYA SARKER - 94.33% (Grade: A+)
+3. AFSANA HENA - 94.00% (Grade: A+)
+4. ABRAR ZAHIN - 93.67% (Grade: A+)
+5. TOWFIQ OMAR RAKIN - 93.33% (Grade: A+)
+
+STUDENTS NEEDING ATTENTION (Bottom 5):
+--------------------------------------------------
+1. FAIZA MUSTARI - 34.67% (Grade: F)
+2. MAINUL HASSAN ASIF - 49.33% (Grade: C)
+3. SHAH MASROOR KABIR - 51.33% (Grade: C+)
+4. DEWAN SOWAIB SADIF - 52.67% (Grade: C+)
+5. MEHAR NIGAR ANONNA - 55.33% (Grade: B-)
+
+ALL STUDENTS RESULTS:
+==========================================================================================
+No.  Student Name                        CT Avg   Mid    Pres   Att  Total  %      Grade 
+------------------------------------------------------------------------------------------
+1    MD. ABU ZIHAD                       9.67     20.0   9.5    8    47.2   94.33  A+    
+2    SHREYA SARKER                       9.67     20.0   9.5    8    47.2   94.33  A+    
+3    AFSANA HENA                         10.00    20.0   9.0    8    47.0   94.00  A+    
+4    ABRAR ZAHIN                         9.83     20.0   9.0    8    46.8   93.67  A+    
+5    TOWFIQ OMAR RAKIN                   9.67     20.0   9.0    8    46.7   93.33  A+    
+6    SAJID-AL-ADEEB                      9.67     20.0   8.5    8    46.2   92.33  A+    
+7    SHEIKH SIFAT RAHMAN                 10.00    20.0   8.0    8    46.0   92.00  A+    
+8    PRANABANTA SHETH SPONDON            8.17     20.0   9.5    8    45.7   91.33  A+    
+9    MARJIA KHATUN                       9.67     20.0   8.0    8    45.7   91.33  A+    
+10   ABDULLAH AL - YAMIN                 9.50     20.0   8.0    8    45.5   91.00  A+    
+11   MD. JUNAYET HOSSAIN MOHIT           9.33     20.0   8.0    8    45.3   90.67  A+    
+12   NUZHAT SAIMA                        9.33     20.0   7.5    8    44.8   89.67  A+    
+13   ABDULLAH MAHMUD YAMIN               8.83     19.5   8.0    8    44.3   88.67  A+    
+14   MD. ZUNAYED IQBAL SHAHED            7.33     19.5   9.5    8    44.3   88.67  A+    
+15   UMME HANI PUNAM                     9.50     18.0   8.5    8    44.0   88.00  A+    
+16   ABDUL HAKIM SHIFAT                  9.00     19.0   8.0    8    44.0   88.00  A+    
+17   MISHA MALIHA                        9.33     20.0   6.5    8    43.8   87.67  A+    
+18   OVIZIT DUTT OVI                     9.83     17.5   8.5    8    43.8   87.67  A+    
+19   SHAHED SHAHRIER                     7.83     19.0   9.0    8    43.8   87.67  A+    
+20   AJWAD MOHTASIM                      9.33     18.0   8.0    8    43.3   86.67  A+    
+21   SHAHRIAR MAHMUD APURBO              9.83     17.5   8.0    8    43.3   86.67  A+    
+22   NUSAIR AHMED CHOWDHURY              8.33     18.0   9.0    8    43.3   86.67  A+    
+23   TASNIM RASHID MEDHA                 9.33     18.0   8.0    8    43.3   86.67  A+    
+24   REHNUMA SALSABIL BINTE OBAYED       9.67     17.5   8.0    8    43.2   86.33  A+    
+25   MD. ABU SAYED                       8.67     18.5   8.0    8    43.2   86.33  A+    
+26   SUMAIYA HOSSAIN ANIKA               9.50     18.5   7.0    8    43.0   86.00  A+    
+27   ABID HASAN ZIDEN                    8.83     18.0   8.0    8    42.8   85.67  A+    
+28   M TASDIK MUTTAKI                    8.67     18.0   8.0    8    42.7   85.33  A+    
+29   AYSHA SIDDIKA                       8.50     18.5   7.5    8    42.5   85.00  A+    
+30   FARHAN ISHRAQ                       8.67     17.5   8.0    8    42.2   84.33  A+    
+31   MD. TAHMIDUR RAHMAN KHAN            9.17     17.0   8.0    8    42.2   84.33  A+    
+32   MIHIR BORMON                        8.50     17.5   8.0    8    42.0   84.00  A+    
+33   MD. MAINUL ISLAM                    8.33     17.5   7.5    8    41.3   82.67  A+    
+34   TASHFIN RUAID                       7.33     18.5   7.5    8    41.3   82.67  A+    
+35   AL SADIQUE NUHIN                    8.50     17.0   7.5    8    41.0   82.00  A+    
+36   SUMEHRA AFSHEEN NUHAA               9.50     16.5   7.0    8    41.0   82.00  A+    
+37   RAIHANUL HASAN KHAN                 8.33     16.5   8.0    8    40.8   81.67  A+    
+38   RUDRO ROY DIP                       9.00     15.5   8.0    8    40.5   81.00  A+    
+39   MD. MASUM MEHORAB                   9.67     14.0   8.5    8    40.2   80.33  A+    
+40   TAQI TAHMID                         8.50     16.0   7.5    8    40.0   80.00  A+    
+41   FAIYAZ KAMRUL KHAN                  8.17     16.0   7.5    8    39.7   79.33  A     
+42   FARHAN ISRAQ JAMI                   9.00     14.5   8.0    8    39.5   79.00  A     
+43   MD. ABID REJWAN                     8.50     14.5   8.5    8    39.5   79.00  A     
+44   SAROWAR HOSSAIN RONY                6.83     18.5   6.0    8    39.3   78.67  A     
+45   TAMIM SHARIAR                       7.67     16.0   7.5    8    39.2   78.33  A     
+46   IFTHEKHAR AHMED                     8.00     16.0   8.0    8    40.0   80.00  A+    
+47   M. SABBIR HASNAT SHAON              8.00     14.5   8.5    8    39.0   78.00  A     
+48   MD. RAISUL ISLAM                    7.33     15.5   8.0    8    38.8   77.67  A     
+49   MD.JONAEID KABIR SHANTO             6.50     16.5   7.5    8    38.5   77.00  A     
+50   MASNOON TAHIM SIJAN                 8.67     15.5   7.0    8    39.2   78.33  A     
+51   TAHIA ZAIMA                         8.17     14.0   8.0    8    38.2   76.33  A     
+52   MD. TAHMID ALAM                     8.83     14.0   8.0    8    38.8   77.67  A     
+53   MD. MEHEDI HASAN FOYSAL             5.83     16.0   8.0    8    37.8   75.67  A     
+54   LUTFUL AHMED NADIM                  7.00     16.0   7.5    8    38.5   77.00  A     
+55   MD. SHOAIB                          7.33     14.0   8.0    8    37.3   74.67  A-    
+56   ABDULLAH BIN TOWHID                 7.17     14.0   8.0    8    37.2   74.33  A-    
+57   JANNATUL SHANJIMOM AURPY            9.17     12.5   7.5    8    37.2   74.33  A-    
+58   MST. SUMAIYA AKTER                  7.17     13.5   8.0    8    36.7   73.33  A-    
+59   ZARIN TASNIM RAHMAN TULY            8.67     12.0   8.0    8    36.7   73.33  A-    
+60   SHAZZAD HOSSAN LABIB                7.67     14.5   6.0    8    36.2   72.33  A-    
+61   MD. ALVEE AHNAF KHAN                7.50     16.5   6.0    8    38.0   76.00  A     
+62   MD. RIFAT AL HASSAN ROMAN           7.83     13.5   7.5    8    36.8   73.67  A-    
+63   MST. REBEKA SULTANA ORCE            9.33     10.0   8.0    8    35.3   70.67  A-    
+64   TABIDA AHMED SUMAIYA                9.17     14.5   6.5    8    38.2   76.33  A     
+65   MD. MARUF ALL RUSHAFI               8.83     14.0   6.0    8    36.8   73.67  A-    
+66   MD.MUSFIQUR RAHMAN SAMA             8.33     11.5   8.0    8    35.8   71.67  A-    
+67   SM SHAHRIER EMON                    5.83     14.5   6.5    8    34.8   69.67  B+    
+68   MD. MOSTAFIZUR RAHAMAN SHUVO        7.83     11.0   8.0    8    34.8   69.67  B+    
+69   GOLAM ALI KIBRIA                    4.50     14.0   8.0    8    34.5   69.00  B+    
+70   M SAIMOON GALIB                     7.83     10.5   7.5    8    33.8   67.67  B+    
+71   MD. TAMJID AHMAD EMON               6.17     13.0   6.5    8    33.7   67.33  B+    
+72   S.M JAKARIA                         7.00     11.0   7.0    8    33.0   66.00  B+    
+73   MST. ANIKA RAHAT SHIPLA             8.00     9.0    7.5    8    32.5   65.00  B+    
+74   NAFIZ AL ANJIM AHMED                7.50     10.0   8.0    8    33.5   67.00  B+    
+75   MASHRAFI ELAHI                      6.83     9.5    7.5    8    31.8   63.67  B     
+76   SUMAIYA BINTA SHAMS                 3.50     11.5   8.0    8    31.0   62.00  B     
+77   MEHAR NIGAR ANONNA                  6.67     7.0    6.0    8    27.7   55.33  B-    
+78   DEWAN SOWAIB SADIF                  3.83     7.5    7.0    8    26.3   52.67  C+    
+79   SHAH MASROOR KABIR                  6.67     5.0    6.0    8    25.7   51.33  C+    
+80   MAINUL HASSAN ASIF                  4.67     5.5    6.5    8    24.7   49.33  C     
+81   FAIZA MUSTARI                       4.33     0.0    5.0    8    17.3   34.67  F     
+
+EXAM-WISE ANALYSIS:
+----------------------------------------
+
+CT1:
+  Average: 6.90
+  Highest: 10.00
+  Lowest: 0.00
+  Absent/Zero marks: 4 students
+
+CT2:
+  Average: 6.59
+  Highest: 10.00
+  Lowest: 0.00
+  Absent/Zero marks: 4 students
+
+CT3:
+  Average: 7.78
+  Highest: 10.00
+  Lowest: 0.00
+  Absent/Zero marks: 1 students
+
+CT4:
+  Average: 8.00
+  Highest: 10.00
+  Lowest: 0.00
+  Absent/Zero marks: 7 students
+
+Best_3_CT_Avg:
+  Average: 8.15
+  Highest: 10.00
+  Lowest: 3.50
+  Absent/Zero marks: 0 students
+
+Mid-Term_Original:
+  Average: 30.95
+  Highest: 40.00
+  Lowest: 0.00
+  Absent/Zero marks: 1 students
+
+Mid-Term:
+  Average: 15.48
+  Highest: 20.00
+  Lowest: 0.00
+  Absent/Zero marks: 1 students
+
+Presentation:
+  Average: 7.74
+  Highest: 9.50
+  Lowest: 5.00
+  Absent/Zero marks: 0 students
+
+Attendance:
+  Average: 8.00
+  Highest: 8.00
+  Lowest: 8.00
+  Absent/Zero marks: 0 students
+
+================================================================================
+Report generated on: 2025-06-24 23:51:47
+================================================================================

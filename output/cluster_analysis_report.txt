@@ -1,0 +1,128 @@
+================================================================================
+EDULINK - CLUSTER ANALYSIS REPORT
+================================================================================
+
+CLUSTER SUMMARY:
+----------------------------------------
+Total Students: 81
+Number of Clusters: 3
+Cluster Labels: Good, Average, Struggling
+
+
+GOOD GROUP STATISTICS:
+----------------------------------------
+Number of Students: 55
+Average Total Score: 79.03
+Score Range: 62.67 - 89.17
+
+All Students in this Group (Sorted by Total Score):
+----------------------------------------------------------------------
+No.  Student Name                        Total Score 
+----------------------------------------------------------------------
+1    MD. ABU ZIHAD                       89.17
+2    SHREYA SARKER                       89.17
+3    AFSANA HENA                         89.00
+4    ABRAR ZAHIN                         88.83
+5    TOWFIQ OMAR RAKIN                   88.67
+6    SAJID-AL-ADEEB                      88.17
+7    SHEIKH SIFAT RAHMAN                 88.00
+8    MARJIA KHATUN                       87.67
+9    PRANABANTA SHETH SPONDON            87.67
+10   ABDULLAH AL - YAMIN                 87.50
+11   MD. JUNAYET HOSSAIN MOHIT           87.33
+12   NUZHAT SAIMA                        86.83
+13   MISHA MALIHA                        85.83
+14   ABDULLAH MAHMUD YAMIN               85.33
+15   MD. ZUNAYED IQBAL SHAHED            85.33
+16   ABDUL HAKIM SHIFAT                  84.00
+17   SHAHED SHAHRIER                     83.83
+18   MD. ABU SAYED                       82.17
+19   SUMAIYA HOSSAIN ANIKA               82.00
+20   UMME HANI PUNAM                     82.00
+21   AYSHA SIDDIKA                       81.50
+22   AJWAD MOHTASIM                      81.33
+23   NUSAIR AHMED CHOWDHURY              81.33
+24   TASNIM RASHID MEDHA                 81.33
+25   OVIZIT DUTT OVI                     80.83
+26   ABID HASAN ZIDEN                    80.83
+27   M TASDIK MUTTAKI                    80.67
+28   SHAHRIAR MAHMUD APURBO              80.33
+29   TASHFIN RUAID                       80.33
+30   REHNUMA SALSABIL BINTE OBAYED       80.17
+31   FARHAN ISHRAQ                       79.17
+32   MIHIR BORMON                        79.00
+33   MD. MAINUL ISLAM                    78.33
+34   SAROWAR HOSSAIN RONY                78.33
+35   MD. TAHMIDUR RAHMAN KHAN            78.17
+36   AL SADIQUE NUHIN                    77.00
+37   SUMEHRA AFSHEEN NUHAA               76.00
+38   RAIHANUL HASAN KHAN                 75.83
+39   TAQI TAHMID                         74.00
+40   FAIYAZ KAMRUL KHAN                  73.67
+41   MD.JONAEID KABIR SHANTO             73.50
+42   RUDRO ROY DIP                       73.50
+43   TAMIM SHARIAR                       73.17
+44   MD. RAISUL ISLAM                    71.83
+45   MD. MEHEDI HASAN FOYSAL             71.83
+46   MD. ABID REJWAN                     70.50
+47   FARHAN ISRAQ JAMI                   70.50
+48   MD. MASUM MEHORAB                   70.17
+49   M. SABBIR HASNAT SHAON              70.00
+50   TAHIA ZAIMA                         68.17
+51   MD. SHOAIB                          67.33
+52   ABDULLAH BIN TOWHID                 67.17
+53   MST. SUMAIYA AKTER                  65.67
+54   JANNATUL SHANJIMOM AURPY            64.17
+55   ZARIN TASNIM RAHMAN TULY            62.67
+
+AVERAGE GROUP STATISTICS:
+----------------------------------------
+Number of Students: 10
+Average Total Score: 66.47
+Score Range: 54.50 - 73.00
+
+All Students in this Group (Sorted by Total Score):
+----------------------------------------------------------------------
+No.  Student Name                        Total Score 
+----------------------------------------------------------------------
+1    IFTHEKHAR AHMED                     73.00
+2    LUTFUL AHMED NADIM                  71.50
+3    MASNOON TAHIM SIJAN                 71.17
+4    MD. ALVEE AHNAF KHAN                71.00
+5    MD. TAHMID ALAM                     67.83
+6    TABIDA AHMED SUMAIYA                66.17
+7    MD. MARUF ALL RUSHAFI               64.83
+8    MD. RIFAT AL HASSAN ROMAN           64.83
+9    MD.MUSFIQUR RAHMAN SAMA             59.83
+10   NAFIZ AL ANJIM AHMED                54.50
+
+STRUGGLING GROUP STATISTICS:
+----------------------------------------
+Number of Students: 16
+Average Total Score: 51.95
+Score Range: 19.33 - 67.17
+
+All Students in this Group (Sorted by Total Score):
+----------------------------------------------------------------------
+No.  Student Name                        Total Score 
+----------------------------------------------------------------------
+1    SHAZZAD HOSSAN LABIB                67.17
+2    SM SHAHRIER EMON                    65.83
+3    GOLAM ALI KIBRIA                    64.50
+4    MD. TAMJID AHMAD EMON               61.67
+5    MD. MOSTAFIZUR RAHAMAN SHUVO        58.83
+6    MST. REBEKA SULTANA ORCE            57.33
+7    S.M JAKARIA                         57.00
+8    M SAIMOON GALIB                     56.83
+9    SUMAIYA BINTA SHAMS                 56.00
+10   MASHRAFI ELAHI                      52.83
+11   MST. ANIKA RAHAT SHIPLA             52.50
+12   MEHAR NIGAR ANONNA                  43.67
+13   DEWAN SOWAIB SADIF                  43.33
+14   SHAH MASROOR KABIR                  37.67
+15   MAINUL HASSAN ASIF                  36.67
+16   FAIZA MUSTARI                       19.33
+
+================================================================================
+Report generated on: 2025-06-24 23:52:01
+================================================================================
