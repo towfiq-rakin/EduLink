@@ -2,7 +2,10 @@ import os
 from tkinter import Toplevel, messagebox, ttk
 import customtkinter as ctk
 from src.services.scholarship_service import ScholarshipService
+from src.services.scholarship_tree_visualizer import generate_scholarship_visualizations
 import pandas as pd
+from PIL import Image, ImageTk
+import tkinter as tk
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
@@ -87,16 +90,146 @@ class ScholarshipWindow:
             # Process scholarships
             results = self.scholarship_service.allocate_scholarships(budget)
 
-            # Generate visualization
-            output_path = self.scholarship_service.visualize_distribution(results)
+            # Generate comprehensive visualizations
+            visualization_results = generate_scholarship_visualizations()
 
             # Display results
             self.display_results(results)
+
+            # Add visualization buttons after processing
+            self.add_visualization_buttons(visualization_results)
 
         except ValueError as e:
             messagebox.showerror("Error", f"Invalid input: {str(e)}")
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred: {str(e)}")
+
+    def add_visualization_buttons(self, visualization_results):
+        """Add buttons to view different visualizations"""
+        # Create visualization buttons frame
+        if hasattr(self, 'viz_frame'):
+            self.viz_frame.destroy()
+
+        self.viz_frame = ctk.CTkFrame(self.main_frame)
+        self.viz_frame.pack(pady=10, padx=10, fill="x")
+
+        # Title for visualization section
+        viz_title = ctk.CTkLabel(
+            self.viz_frame,
+            text="Scholarship Analysis Visualizations",
+            font=('Century Gothic', 16, 'bold')
+        )
+        viz_title.pack(pady=10)
+
+        # Button frame for horizontal layout
+        button_frame = ctk.CTkFrame(self.viz_frame)
+        button_frame.pack(pady=10, fill="x")
+
+        # Decision Tree Button
+        decision_tree_btn = ctk.CTkButton(
+            button_frame,
+            text="View Decision Tree",
+            command=lambda: self.show_visualization(
+                visualization_results['decision_tree'],
+                "Scholarship Decision Tree"
+            ),
+            font=('Century Gothic', 12)
+        )
+        decision_tree_btn.pack(side="left", padx=5, expand=True, fill="x")
+
+        # Statistics Tree Button
+        stats_tree_btn = ctk.CTkButton(
+            button_frame,
+            text="View Statistics Tree",
+            command=lambda: self.show_visualization(
+                visualization_results['statistics_tree'],
+                "Scholarship Statistics Tree"
+            ),
+            font=('Century Gothic', 12)
+        )
+        stats_tree_btn.pack(side="left", padx=5, expand=True, fill="x")
+
+        # Comprehensive Analysis Button
+        comprehensive_btn = ctk.CTkButton(
+            button_frame,
+            text="View Comprehensive Analysis",
+            command=lambda: self.show_visualization(
+                visualization_results['comprehensive_analysis'],
+                "Comprehensive Scholarship Analysis"
+            ),
+            font=('Century Gothic', 12)
+        )
+        comprehensive_btn.pack(side="left", padx=5, expand=True, fill="x")
+
+    def show_visualization(self, image_path, title):
+        """Display visualization image in a new window"""
+        try:
+            if not os.path.exists(image_path):
+                messagebox.showerror("Error", f"Visualization file not found: {image_path}")
+                return
+
+            # Create new window for visualization
+            viz_window = Toplevel(self.window)
+            viz_window.title(title)
+            viz_window.geometry("1200x800")
+            viz_window.configure(bg='white')
+
+            # Load and display image
+            image = Image.open(image_path)
+
+            # Calculate scaling to fit window while maintaining aspect ratio
+            window_width, window_height = 1150, 750
+            img_width, img_height = image.size
+
+            # Calculate scale factor
+            scale_x = window_width / img_width
+            scale_y = window_height / img_height
+            scale = min(scale_x, scale_y, 1.0)  # Don't scale up, only down
+
+            # Resize image if needed
+            if scale < 1.0:
+                new_width = int(img_width * scale)
+                new_height = int(img_height * scale)
+                image = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+
+            # Convert to PhotoImage
+            photo = ImageTk.PhotoImage(image)
+
+            # Create canvas for scrolling
+            canvas = tk.Canvas(viz_window, bg='white')
+            scrollbar_v = ttk.Scrollbar(viz_window, orient="vertical", command=canvas.yview)
+            scrollbar_h = ttk.Scrollbar(viz_window, orient="horizontal", command=canvas.xview)
+
+            canvas.configure(yscrollcommand=scrollbar_v.set, xscrollcommand=scrollbar_h.set)
+
+            # Pack scrollbars and canvas
+            scrollbar_v.pack(side="right", fill="y")
+            scrollbar_h.pack(side="bottom", fill="x")
+            canvas.pack(side="left", fill="both", expand=True)
+
+            # Add image to canvas
+            canvas.create_image(0, 0, anchor="nw", image=photo)
+            canvas.configure(scrollregion=canvas.bbox("all"))
+
+            # Keep a reference to prevent garbage collection
+            canvas.image = photo
+
+            # Add close button
+            close_btn = tk.Button(
+                viz_window,
+                text="Close",
+                command=viz_window.destroy,
+                font=('Century Gothic', 12),
+                bg='#1f538d',
+                fg='white',
+                relief='flat',
+                padx=20,
+                pady=5
+            )
+            close_btn.pack(side="bottom", pady=10)
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to display visualization: {str(e)}")
 
     def display_results(self, results):
         # Display summary statistics

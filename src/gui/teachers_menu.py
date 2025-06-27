@@ -935,7 +935,7 @@ class TeachersMenu:
                     # Create container for rows
                     rows_container = ctk.CTkScrollableFrame(
                         self.scholarship_results_frame,
-                        height=300,
+                        height=400,
                         corner_radius=8,
                         fg_color="transparent"
                     )
