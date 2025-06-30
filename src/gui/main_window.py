@@ -17,7 +17,7 @@ class MainWindow:
         master.geometry("500x400")
         
         # Set the appearance mode and color theme
-        ctk.set_appearance_mode("dark")
+        ctk.set_appearance_mode("light")
         ctk.set_default_color_theme("blue")
 
         # Main frame
@@ -361,7 +361,7 @@ class ResultAnalysisWindow:
             self.text_area.insert("1.0", f"Error generating report: {str(e)}")
 
 if __name__ == "__main__":
-    ctk.set_appearance_mode("dark")
+    ctk.set_appearance_mode("light")
     ctk.set_default_color_theme("blue")
     
     root = ctk.CTk()

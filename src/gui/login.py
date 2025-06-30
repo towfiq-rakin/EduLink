@@ -5,7 +5,7 @@ import os
 from services import accounts_db
 from gui.teachers_menu import TeachersMenu
 
-ctk.set_appearance_mode("dark")
+ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("blue")
 
 class LoginWindow:

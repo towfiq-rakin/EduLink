@@ -7,7 +7,7 @@ import pandas as pd
 from PIL import Image, ImageTk
 import tkinter as tk
 
-ctk.set_appearance_mode("dark")
+ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("blue")
 
 class ScholarshipWindow:
@@ -15,7 +15,7 @@ class ScholarshipWindow:
         self.master = master
         self.window = Toplevel(master)
         self.window.title("Scholarship Management")
-        self.window.geometry("800x600")
+        self.window.geometry("900x700")
 
         self.scholarship_service = ScholarshipService()
 

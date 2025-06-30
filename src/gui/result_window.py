@@ -1,5 +1,10 @@
+import customtkinter as ctk
 from customtkinter import CTk, CTkLabel, CTkButton, CTkTextbox
 import pandas as pd
+
+# Set light mode for consistency
+ctk.set_appearance_mode("light")
+ctk.set_default_color_theme("blue")
 
 class ResultWindow(CTk):
     def __init__(self, master=None):

@@ -3,11 +3,16 @@ import sys
 import customtkinter as ctk
 from PIL import Image
 
+# Set light mode for consistency
+ctk.set_appearance_mode("light")
+ctk.set_default_color_theme("blue")
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 from src.services.result_analyzer import ResultAnalyzer
 from src.services.cluster_analyzer import ClusterAnalyzer
 from src.services.scholarship_service import ScholarshipService
+from src.gui.scholarship_window import ScholarshipWindow
 
 class TeachersMenu:
     def __init__(self, master):
@@ -213,34 +218,12 @@ class TeachersMenu:
         self.results_area.pack(fill="both", expand=True, padx=20, pady=(0, 20))
 
     def show_scholarship_view(self):
-        self.header.configure(text="Scholarship Management")
-        for widget in self.content_frame.winfo_children():
-            widget.destroy()
-
-        # Create scholarship management interface
-        form_frame = ctk.CTkFrame(self.content_frame)
-        form_frame.pack(fill="x", padx=20, pady=20)
-
-        ctk.CTkLabel(
-            form_frame,
-            text="Total Scholarship Budget (TK):",
-            font=('Century Gothic', 14)
-        ).pack(side="left", padx=5)
-
-        self.budget_entry = ctk.CTkEntry(form_frame, width=200)
-        self.budget_entry.pack(side="left", padx=5)
-
-        process_btn = ctk.CTkButton(
-            form_frame,
-            text="Process Scholarships",
-            command=self.process_scholarships,
-            font=('Century Gothic', 14)
-        )
-        process_btn.pack(side="left", padx=20)
-
-        # Create results area
-        self.scholarship_results_frame = ctk.CTkScrollableFrame(self.content_frame)
-        self.scholarship_results_frame.pack(fill="both", expand=True, padx=20, pady=(0, 20))
+        """Open the dedicated scholarship management window"""
+        try:
+            scholarship_window = ScholarshipWindow(self.master)
+            self.status_label.configure(text="Scholarship window opened")
+        except Exception as e:
+            self.status_label.configure(text=f"Error opening scholarship window: {str(e)}")
 
     def show_reports_view(self):
         self.header.configure(text="Generated Reports")
