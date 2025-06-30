@@ -1202,6 +1202,13 @@ class TeachersMenu:
         self.header.configure(text="Student Information")
         for widget in self.content_frame.winfo_children():
             widget.destroy()
+        # Frame for sort dropdown
+        sort_frame = ctk.CTkFrame(self.content_frame)
+        sort_frame.pack(fill="x", padx=20, pady=(20, 0))
+        ctk.CTkLabel(sort_frame, text="Sort by Percentage:", font=("Century Gothic", 12)).pack(side="left", padx=(0,10))
+        sort_var = ctk.StringVar(value="Ascending")
+        sort_menu = ctk.CTkOptionMenu(sort_frame, variable=sort_var, values=["Ascending", "Descending"])
+        sort_menu.pack(side="left")
         # Frame for table
         table_frame = ctk.CTkFrame(self.content_frame)
         table_frame.pack(fill="both", expand=True, padx=20, pady=20)
@@ -1219,15 +1226,27 @@ class TeachersMenu:
             conn.close()
             return
         conn.close()
+        # Find percentage column index
+        try:
+            percentage_idx = columns.index("percentage")
+        except ValueError:
+            percentage_idx = None
+        def update_table(*args):
+            for item in tree.get_children():
+                tree.delete(item)
+            if percentage_idx is not None:
+                sorted_rows = self.merge_sort(rows, percentage_idx, reverse=(sort_var.get()=="Descending"))
+            else:
+                sorted_rows = rows
+            for row in sorted_rows:
+                formatted_row = [f"{v:.2f}" if isinstance(v, float) else v for v in row]
+                tree.insert("", "end", values=formatted_row)
+            info_label.configure(text=f"Total students: {len(rows)}")
         # Create Treeview
         tree = ttk.Treeview(table_frame, columns=columns, show="headings")
         for col in columns:
             tree.heading(col, text=col.replace('_', ' ').title())
             tree.column(col, anchor="w", width=120)
-        # Format float values to 2 decimal places
-        for row in rows:
-            formatted_row = [f"{v:.2f}" if isinstance(v, float) else v for v in row]
-            tree.insert("", "end", values=formatted_row)
         tree.pack(fill="both", expand=True)
         # Add vertical scrollbar
         vsb = ttk.Scrollbar(table_frame, orient="vertical", command=tree.yview)
@@ -1238,4 +1257,41 @@ class TeachersMenu:
         tree.configure(xscrollcommand=hsb.set)
         hsb.pack(side="bottom", fill="x")
         # Info label
-        ctk.CTkLabel(table_frame, text=f"Total students: {len(rows)}", font=("Century Gothic", 12)).pack(anchor="w", pady=(10,0))
+        info_label = ctk.CTkLabel(table_frame, text=f"Total students: {len(rows)}", font=("Century Gothic", 12))
+        info_label.pack(anchor="w", pady=(10,0))
+        # Initial table load
+        update_table()
+        # Bind dropdown change
+        sort_var.trace_add('write', lambda *args: update_table())
+
+    def merge_sort(self, data, col_idx, reverse=False):
+        if len(data) <= 1:
+            return data
+        mid = len(data) // 2
+        left = self.merge_sort(data[:mid], col_idx, reverse)
+        right = self.merge_sort(data[mid:], col_idx, reverse)
+        return self.merge(left, right, col_idx, reverse)
+
+    def merge(self, left, right, col_idx, reverse):
+        result = []
+        i = j = 0
+        while i < len(left) and j < len(right):
+            l_val = left[i][col_idx]
+            r_val = right[j][col_idx]
+            if reverse:
+                if l_val > r_val:
+                    result.append(left[i])
+                    i += 1
+                else:
+                    result.append(right[j])
+                    j += 1
+            else:
+                if l_val < r_val:
+                    result.append(left[i])
+                    i += 1
+                else:
+                    result.append(right[j])
+                    j += 1
+        result.extend(left[i:])
+        result.extend(right[j:])
+        return result
