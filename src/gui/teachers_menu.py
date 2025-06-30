@@ -73,15 +73,20 @@ class TeachersMenu:
             ("Reports", self.show_reports_view)
         ]
 
-        for i, (text, command) in enumerate(menu_items, start=1):
+        menu_frame = ctk.CTkFrame(self.sidebar, fg_color="transparent")
+        menu_frame.grid(row=1, column=0, sticky="nsew")
+        menu_frame.grid_rowconfigure(tuple(range(len(menu_items))), weight=1)
+        menu_frame.grid_columnconfigure(0, weight=1)
+
+        for i, (text, command) in enumerate(menu_items):
             btn = ctk.CTkButton(
-                self.sidebar,
+                menu_frame,
                 text=text,
                 command=command,
                 height=40,
                 font=('Century Gothic', 14)
             )
-            btn.grid(row=i, column=0, padx=20, pady=5, sticky="ew")
+            btn.grid(row=i, column=0, padx=20, pady=(0 if i == 0 else 10), sticky="ew")
 
         # # Version info at bottom
         # version_label = ctk.CTkLabel(
