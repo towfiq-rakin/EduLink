@@ -1224,8 +1224,10 @@ class TeachersMenu:
         for col in columns:
             tree.heading(col, text=col.replace('_', ' ').title())
             tree.column(col, anchor="w", width=120)
+        # Format float values to 2 decimal places
         for row in rows:
-            tree.insert("", "end", values=row)
+            formatted_row = [f"{v:.2f}" if isinstance(v, float) else v for v in row]
+            tree.insert("", "end", values=formatted_row)
         tree.pack(fill="both", expand=True)
         # Add vertical scrollbar
         vsb = ttk.Scrollbar(table_frame, orient="vertical", command=tree.yview)

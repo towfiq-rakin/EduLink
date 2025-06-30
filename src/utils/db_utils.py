@@ -140,9 +140,12 @@ class DatabaseManager:
                 print(f"File not found: {csv_path}")
                 return False, 0
 
-            # First, clear existing data
-            self.execute_query("DELETE FROM DSA")
-            self.commit()
+            # Only import if DSA table is empty
+            self.execute_query("SELECT COUNT(*) FROM DSA")
+            count = self.cursor.fetchone()[0]
+            if count > 0:
+                print("DSA table already contains data. Skipping import.")
+                return False, 0
 
             # Read CSV file
             df = pd.read_csv(csv_path)
