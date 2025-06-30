@@ -1,6 +1,8 @@
 import os
 import sys
 import customtkinter as ctk
+import sqlite3
+from tkinter import ttk
 from PIL import Image
 
 # Set light mode for consistency
@@ -65,6 +67,7 @@ class TeachersMenu:
         # Navigation menu
         menu_items = [
             ("Dashboard", self.show_dashboard),
+            ("Student Information", self.show_student_info_view),
             ("Analysis", self.show_analysis_view),
             ("Scholarships", self.show_scholarship_view),
             ("Reports", self.show_reports_view)
@@ -80,13 +83,13 @@ class TeachersMenu:
             )
             btn.grid(row=i, column=0, padx=20, pady=5, sticky="ew")
 
-        # Version info at bottom
-        version_label = ctk.CTkLabel(
-            self.sidebar,
-            text="Version 1.0.0",
-            font=('Century Gothic', 12)
-        )
-        version_label.grid(row=5, column=0, padx=20, pady=20, sticky="s")
+        # # Version info at bottom
+        # version_label = ctk.CTkLabel(
+        #     self.sidebar,
+        #     text="Version 1.0.0",
+        #     font=('Century Gothic', 12)
+        # )
+        # version_label.grid(row=5, column=0, padx=20, pady=20, sticky="s")
 
     def create_main_content(self):
         # Main content container with tabs
@@ -494,7 +497,7 @@ class TeachersMenu:
                     report_btn = ctk.CTkButton(
                         report_frame,
                         text="View Full Report",
-                        command=lambda: self.open_file_externally(report_path),
+                        command=self.show_cluster_text_report,
                         width=150,
                         font=('Century Gothic', 14)
                     )
@@ -1104,6 +1107,86 @@ class TeachersMenu:
         except Exception as e:
             self.status_label.configure(text=f"Error showing report: {str(e)}")
 
+    def show_cluster_text_report(self):
+        """Display the full cluster analysis text report in a new window"""
+        try:
+            output_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'output')
+            report_path = os.path.join(output_dir, "cluster_analysis_report.txt")
+
+            # If report doesn't exist, try to generate it
+            if not os.path.exists(report_path):
+                if hasattr(self.cluster_analyzer, 'save_report_to_file'):
+                    self.cluster_analyzer.save_report_to_file()
+
+            # Create a new toplevel window
+            report_window = ctk.CTkToplevel(self.master)
+            report_window.title("Full Cluster Analysis Report")
+            report_window.geometry("900x700")
+            report_window.grab_set()  # Make the window modal
+
+            # Create a frame for the report content
+            frame = ctk.CTkFrame(report_window)
+            frame.pack(fill="both", expand=True, padx=20, pady=20)
+
+            # Add a header
+            header = ctk.CTkLabel(
+                frame,
+                text="Complete Cluster Analysis Report",
+                font=('Century Gothic', 20, 'bold')
+            )
+            header.pack(pady=(10, 20))
+
+            # Create a scrollable text widget to display the report
+            text_container = ctk.CTkScrollableFrame(frame)
+            text_container.pack(fill="both", expand=True, padx=10, pady=10)
+
+            # Read the report file
+            with open(report_path, 'r') as f:
+                report_text = f.read()
+
+            # Display the report in a text widget with monospaced font
+            text_widget = ctk.CTkTextbox(text_container, width=800, height=500, font=("Courier New", 12))
+            text_widget.pack(fill="both", expand=True, padx=5, pady=5)
+            text_widget.insert("1.0", report_text)
+            text_widget.configure(state="disabled")  # Make it read-only
+
+            # Add buttons at the bottom
+            button_frame = ctk.CTkFrame(report_window, fg_color="transparent")
+            button_frame.pack(pady=15)
+
+            # Open in external app button
+            open_btn = ctk.CTkButton(
+                button_frame,
+                text="Open in External App",
+                command=lambda: self.open_file_externally(report_path),
+                width=150,
+                font=('Century Gothic', 12)
+            )
+            open_btn.pack(side="left", padx=10)
+
+            # Copy to clipboard button
+            copy_btn = ctk.CTkButton(
+                button_frame,
+                text="Copy to Clipboard",
+                command=lambda: self.copy_to_clipboard(report_text),
+                width=150,
+                font=('Century Gothic', 12)
+            )
+            copy_btn.pack(side="left", padx=10)
+
+            # Close button
+            close_btn = ctk.CTkButton(
+                button_frame,
+                text="Close",
+                command=report_window.destroy,
+                width=100,
+                font=('Century Gothic', 12)
+            )
+            close_btn.pack(side="left", padx=10)
+
+        except Exception as e:
+            self.status_label.configure(text=f"Error showing cluster report: {str(e)}")
+
     def copy_to_clipboard(self, text):
         """Copy text to clipboard"""
         try:
@@ -1112,3 +1195,45 @@ class TeachersMenu:
             self.status_label.configure(text="Report copied to clipboard successfully!")
         except Exception as e:
             self.status_label.configure(text=f"Error copying to clipboard: {str(e)}")
+
+    def show_student_info_view(self):
+        """Display all students information in a table frame from the database (DSA table)"""
+
+        self.header.configure(text="Student Information")
+        for widget in self.content_frame.winfo_children():
+            widget.destroy()
+        # Frame for table
+        table_frame = ctk.CTkFrame(self.content_frame)
+        table_frame.pack(fill="both", expand=True, padx=20, pady=20)
+        # Connect to student.db
+        db_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'student.db')
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        # Try to fetch all students from DSA table
+        try:
+            cursor.execute("SELECT * FROM DSA")
+            rows = cursor.fetchall()
+            columns = [desc[0] for desc in cursor.description]
+        except Exception as e:
+            ctk.CTkLabel(table_frame, text=f"Error loading students: {e}", font=("Century Gothic", 14)).pack(pady=20)
+            conn.close()
+            return
+        conn.close()
+        # Create Treeview
+        tree = ttk.Treeview(table_frame, columns=columns, show="headings")
+        for col in columns:
+            tree.heading(col, text=col.replace('_', ' ').title())
+            tree.column(col, anchor="w", width=120)
+        for row in rows:
+            tree.insert("", "end", values=row)
+        tree.pack(fill="both", expand=True)
+        # Add vertical scrollbar
+        vsb = ttk.Scrollbar(table_frame, orient="vertical", command=tree.yview)
+        tree.configure(yscrollcommand=vsb.set)
+        vsb.pack(side="right", fill="y")
+        # Add horizontal scrollbar
+        hsb = ttk.Scrollbar(table_frame, orient="horizontal", command=tree.xview)
+        tree.configure(xscrollcommand=hsb.set)
+        hsb.pack(side="bottom", fill="x")
+        # Info label
+        ctk.CTkLabel(table_frame, text=f"Total students: {len(rows)}", font=("Century Gothic", 12)).pack(anchor="w", pady=(10,0))
