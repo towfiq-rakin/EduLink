@@ -1205,9 +1205,9 @@ class TeachersMenu:
         # Frame for sort dropdown
         sort_frame = ctk.CTkFrame(self.content_frame)
         sort_frame.pack(fill="x", padx=20, pady=(20, 0))
-        ctk.CTkLabel(sort_frame, text="Sort by Percentage:", font=("Century Gothic", 12)).pack(side="left", padx=(0,10))
-        sort_var = ctk.StringVar(value="Ascending")
-        sort_menu = ctk.CTkOptionMenu(sort_frame, variable=sort_var, values=["Ascending", "Descending"])
+        ctk.CTkLabel(sort_frame, text="Sort by:", font=("Century Gothic", 12)).pack(side="left", padx=(0,10))
+        sort_var = ctk.StringVar(value="Default")
+        sort_menu = ctk.CTkOptionMenu(sort_frame, variable=sort_var, values=["Default", "Ascending", "Descending"])
         sort_menu.pack(side="left")
         # Frame for table
         table_frame = ctk.CTkFrame(self.content_frame)
@@ -1234,10 +1234,10 @@ class TeachersMenu:
         def update_table(*args):
             for item in tree.get_children():
                 tree.delete(item)
-            if percentage_idx is not None:
-                sorted_rows = self.merge_sort(rows, percentage_idx, reverse=(sort_var.get()=="Descending"))
+            if sort_var.get() == "Default" or percentage_idx is None:
+                sorted_rows = rows  # Original order (serial)
             else:
-                sorted_rows = rows
+                sorted_rows = self.merge_sort(rows, percentage_idx, reverse=(sort_var.get()=="Descending"))
             for row in sorted_rows:
                 formatted_row = [f"{v:.2f}" if isinstance(v, float) else v for v in row]
                 tree.insert("", "end", values=formatted_row)
