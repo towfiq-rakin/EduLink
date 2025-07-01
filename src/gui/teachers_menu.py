@@ -2,8 +2,9 @@ import os
 import sys
 import customtkinter as ctk
 import sqlite3
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from PIL import Image
+import pandas as pd
 
 # Set light mode for consistency
 ctk.set_appearance_mode("light")
@@ -68,6 +69,7 @@ class TeachersMenu:
         menu_items = [
             ("Dashboard", self.show_dashboard),
             ("Student Information", self.show_student_info_view),
+            ("Information", self.show_information),  # Added new menu item
             ("Analysis", self.show_analysis_view),
             ("Scholarships", self.show_scholarship_view),
             ("Reports", self.show_reports_view)
@@ -97,19 +99,23 @@ class TeachersMenu:
         # version_label.grid(row=5, column=0, padx=20, pady=20, sticky="s")
 
     def create_main_content(self):
-        # Main content container with tabs
+        """Initialize the main content area"""
+        # Main content container
         self.main_content = ctk.CTkFrame(self.master)
         self.main_content.grid(row=0, column=1, sticky="nsew", padx=(5, 10), pady=10)
         self.main_content.grid_rowconfigure(1, weight=1)
         self.main_content.grid_columnconfigure(0, weight=1)
 
         # Header
+        self.header_frame = ctk.CTkFrame(self.main_content, fg_color="transparent")
+        self.header_frame.grid(row=0, column=0, padx=20, pady=(20, 10), sticky="nw")
+
         self.header = ctk.CTkLabel(
-            self.main_content,
+            self.header_frame,
             text="Welcome to Teachers Dashboard",
             font=('Century Gothic', 24, 'bold')
         )
-        self.header.grid(row=0, column=0, padx=20, pady=(20, 10), sticky="nw")
+        self.header.pack(side="left", pady=10)
 
         # Content area
         self.content_frame = ctk.CTkFrame(self.main_content)
@@ -191,39 +197,265 @@ class TeachersMenu:
         self.status_label.pack(side="left", padx=15)
 
     def show_dashboard(self):
-        self.header.configure(text="Dashboard")
-        self.create_dashboard()
+        """Show the dashboard view"""
+        try:
+            if hasattr(self, 'header'):
+                self.header.configure(text="Dashboard")
+            self._clear_content()
+            self.create_dashboard()
+        except Exception as e:
+            print(f"Error showing dashboard: {e}")
+
+    def show_student_info_view(self):
+        """Display student information view"""
+        try:
+            if hasattr(self, 'header'):
+                self.header.configure(text="Student Information")
+            self._clear_content()
+
+            # Create main container
+            main_container = ctk.CTkFrame(self.content_frame)
+            main_container.pack(fill="both", expand=True, padx=20, pady=20)
+
+            # Add sort frame
+            sort_frame = ctk.CTkFrame(main_container)
+            sort_frame.pack(fill="x", pady=(0, 10))
+            ctk.CTkLabel(sort_frame, text="Sort by:", font=("Century Gothic", 12)).pack(side="left", padx=(10, 5))
+            sort_var = ctk.StringVar(value="Default")
+            sort_menu = ctk.CTkOptionMenu(sort_frame, variable=sort_var, values=["Default", "Ascending", "Descending"])
+            sort_menu.pack(side="left", padx=5)
+
+            # Create table container
+            table_container = ctk.CTkFrame(main_container)
+            table_container.pack(fill="both", expand=True)
+
+            # Connect to student.db and fetch data
+            db_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'student.db')
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+
+            try:
+                # Calculate all required values in the SQL query
+                cursor.execute("""
+                    SELECT 
+                        student_id, 
+                        student_name, 
+                        CT1, CT2, CT3, CT4,
+                        mid_term,
+                        presentation,
+                        attendance,
+                        (SELECT (
+                            CASE 
+                                WHEN COUNT(*) = 0 THEN NULL
+                                ELSE (
+                                    SELECT AVG(x)
+                                    FROM (
+                                        SELECT x
+                                        FROM (SELECT CT1 as x WHERE CT1 IS NOT NULL
+                                              UNION ALL SELECT CT2 WHERE CT2 IS NOT NULL
+                                              UNION ALL SELECT CT3 WHERE CT3 IS NOT NULL
+                                              UNION ALL SELECT CT4 WHERE CT4 IS NOT NULL)
+                                        ORDER BY x DESC
+                                        LIMIT 3
+                                    )
+                                )
+                            END
+                        )) as best_3_CT_avg,
+                        CASE 
+                            WHEN mid_term IS NOT NULL 
+                            THEN (mid_term / 2.0)  -- Scale to 20 marks by dividing by 2
+                            ELSE NULL 
+                        END as midterm_scaled,
+                        CASE 
+                            WHEN mid_term IS NOT NULL AND attendance IS NOT NULL AND presentation IS NOT NULL
+                            THEN (
+                                (SELECT (
+                                    CASE 
+                                        WHEN COUNT(*) = 0 THEN 0
+                                        ELSE (
+                                            SELECT AVG(x)
+                                            FROM (
+                                                SELECT x
+                                                FROM (SELECT CT1 as x WHERE CT1 IS NOT NULL
+                                                      UNION ALL SELECT CT2 WHERE CT2 IS NOT NULL
+                                                      UNION ALL SELECT CT3 WHERE CT3 IS NOT NULL
+                                                      UNION ALL SELECT CT4 WHERE CT4 IS NOT NULL)
+                                                ORDER BY x DESC
+                                                LIMIT 3
+                                            )
+                                        )
+                                    END
+                                )) + (mid_term / 2.0) + presentation + attendance
+                            )
+                            ELSE NULL 
+                        END as total_obtained,
+                        CASE 
+                            WHEN mid_term IS NOT NULL AND attendance IS NOT NULL AND presentation IS NOT NULL
+                            THEN (
+                                (
+                                    (SELECT (
+                                        CASE 
+                                            WHEN COUNT(*) = 0 THEN 0
+                                            ELSE (
+                                                SELECT AVG(x)
+                                                FROM (
+                                                    SELECT x
+                                                    FROM (SELECT CT1 as x WHERE CT1 IS NOT NULL
+                                                          UNION ALL SELECT CT2 WHERE CT2 IS NOT NULL
+                                                          UNION ALL SELECT CT3 WHERE CT3 IS NOT NULL
+                                                          UNION ALL SELECT CT4 WHERE CT4 IS NOT NULL)
+                                                    ORDER BY x DESC
+                                                    LIMIT 3
+                                                )
+                                            )
+                                        END
+                                    )) + (mid_term / 2.0) + presentation + attendance
+                                ) * 100.0 / 50.0
+                            )
+                            ELSE NULL 
+                        END as percentage,
+                        CASE 
+                            WHEN total_obtained >= 45 THEN 'A+'
+                            WHEN total_obtained >= 40 THEN 'A'
+                            WHEN total_obtained >= 35 THEN 'B+'
+                            WHEN total_obtained >= 30 THEN 'B'
+                            WHEN total_obtained >= 25 THEN 'C+'
+                            WHEN total_obtained >= 20 THEN 'C'
+                            WHEN total_obtained IS NOT NULL THEN 'F'
+                            ELSE NULL
+                        END as grade
+                    FROM DSA
+                """)
+                rows = cursor.fetchall()
+
+                # Column names that match the query order
+                columns = ['ID', 'Name', 'CT1', 'CT2', 'CT3', 'CT4', 'Mid Term',
+                          'Presentation', 'Attendance', 'CT Average', 'Mid Scaled',
+                          'Total', 'Percentage', 'Grade']
+
+                # Define column indices for sorting
+                PERCENTAGE_COL_IDX = 12  # Index of percentage in our SELECT query
+            except Exception as e:
+                ctk.CTkLabel(table_container, text=f"Error loading students: {e}", font=("Century Gothic", 14)).pack(pady=20)
+                conn.close()
+                return
+            conn.close()
+
+            # Convert rows to list for easier manipulation
+            rows = list(rows)
+
+            # Create Treeview with scrollbars
+            tree_frame = ctk.CTkFrame(table_container)
+            tree_frame.pack(fill="both", expand=True)
+
+            tree = ttk.Treeview(tree_frame, columns=columns, show="headings")
+            vsb = ttk.Scrollbar(tree_frame, orient="vertical", command=tree.yview)
+            hsb = ttk.Scrollbar(table_container, orient="horizontal", command=tree.xview)
+
+            tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
+
+            # Pack scrollbars and tree
+            vsb.pack(side="right", fill="y")
+            tree.pack(side="left", fill="both", expand=True)
+            hsb.pack(side="bottom", fill="x")
+
+            # Configure columns with proper widths
+            column_widths = {
+                'ID': 80, 'Name': 200, 'CT1': 60, 'CT2': 60, 'CT3': 60, 'CT4': 60,
+                'Mid Term': 80, 'Presentation': 100, 'Attendance': 100,
+                'CT Average': 100, 'Mid Scaled': 100, 'Total': 80,
+                'Percentage': 100, 'Grade': 60
+            }
+
+            for col in columns:
+                tree.heading(col, text=col)
+                tree.column(col, width=column_widths.get(col, 120), anchor="center")
+
+            # Add info label below the table
+            info_label = ctk.CTkLabel(main_container, text=f"Total students: {len(rows)}", font=("Century Gothic", 12))
+            info_label.pack(pady=(10, 0), anchor="w")
+
+            def format_numeric(value):
+                if value is None:
+                    return ""
+                try:
+                    float_val = float(value)
+                    if float_val.is_integer():
+                        return str(int(float_val))
+                    return f"{float_val:.2f}"
+                except (ValueError, TypeError):
+                    return str(value) if value is not None else ""
+
+            def update_table(*args):
+                # Clear existing items
+                for item in tree.get_children():
+                    tree.delete(item)
+
+                # Sort the data based on selection
+                sorted_rows = rows.copy()
+                if sort_var.get() != "Default":
+                    # Sort by percentage (index 12 in our query)
+                    percentage_idx = 12  # Index of percentage in our SELECT query
+                    sorted_rows = self.merge_sort(sorted_rows, percentage_idx, reverse=(sort_var.get() == "Descending"))
+
+                # Insert sorted data
+                for row in sorted_rows:
+                    formatted_row = []
+                    for i, val in enumerate(row):
+                        if i in [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]:  # Numeric columns
+                            formatted_row.append(format_numeric(val))
+                        else:
+                            formatted_row.append(str(val) if val is not None else "")
+                    tree.insert("", "end", values=formatted_row)
+
+                info_label.configure(text=f"Total students: {len(sorted_rows)}")
+
+            # Bind the sort menu to update_table function
+            sort_var.trace_add("write", update_table)
+
+            # Initial table population
+            update_table()
+
+        except Exception as e:
+            print(f"Error showing student info: {e}")
+            if hasattr(self, 'status_label'):
+                self.status_label.configure(text=f"Error showing student information: {str(e)}")
 
     def show_analysis_view(self):
-        self.header.configure(text="Analysis Center")
-        for widget in self.content_frame.winfo_children():
-            widget.destroy()
+        """Show the analysis view"""
+        try:
+            if hasattr(self, 'header'):
+                self.header.configure(text="Analysis Center")
+            self._clear_content()
 
-        # Create analysis options
-        options_frame = ctk.CTkFrame(self.content_frame)
-        options_frame.pack(fill="x", padx=20, pady=20)
+            # Create analysis options frame
+            options_frame = ctk.CTkFrame(self.content_frame)
+            options_frame.pack(fill="x", padx=20, pady=20)
 
-        analyze_btn = ctk.CTkButton(
-            options_frame,
-            text="Analyze Results",
-            command=self.analyze_results,
-            width=200,
-            font=('Century Gothic', 14)
-        )
-        analyze_btn.pack(side="left", padx=10)
+            analyze_btn = ctk.CTkButton(
+                options_frame,
+                text="Analyze Results",
+                command=self.analyze_results,
+                width=200,
+                font=('Century Gothic', 14)
+            )
+            analyze_btn.pack(side="left", padx=10)
 
-        cluster_btn = ctk.CTkButton(
-            options_frame,
-            text="Cluster Analysis",
-            command=self.perform_cluster_analysis,
-            width=200,
-            font=('Century Gothic', 14)
-        )
-        cluster_btn.pack(side="left", padx=10)
+            cluster_btn = ctk.CTkButton(
+                options_frame,
+                text="Cluster Analysis",
+                command=self.perform_cluster_analysis,
+                width=200,
+                font=('Century Gothic', 14)
+            )
+            cluster_btn.pack(side="left", padx=10)
 
-        # Create results area
-        self.results_area = ctk.CTkScrollableFrame(self.content_frame)
-        self.results_area.pack(fill="both", expand=True, padx=20, pady=(0, 20))
+            # Create results area
+            self.results_area = ctk.CTkScrollableFrame(self.content_frame)
+            self.results_area.pack(fill="both", expand=True, padx=20, pady=(0, 20))
+
+        except Exception as e:
+            print(f"Error showing analysis view: {e}")
 
     def show_scholarship_view(self):
         """Open the dedicated scholarship management window"""
@@ -234,79 +466,155 @@ class TeachersMenu:
             self.status_label.configure(text=f"Error opening scholarship window: {str(e)}")
 
     def show_reports_view(self):
-        self.header.configure(text="Generated Reports")
-        for widget in self.content_frame.winfo_children():
-            widget.destroy()
+        """Show the reports view"""
+        try:
+            if hasattr(self, 'header'):
+                self.header.configure(text="Reports")
+            self._clear_content()
 
-        reports_area = ctk.CTkScrollableFrame(self.content_frame)
-        reports_area.pack(fill="both", expand=True, padx=20, pady=20)
+            reports_area = ctk.CTkScrollableFrame(self.content_frame)
+            reports_area.pack(fill="both", expand=True, padx=20, pady=20)
 
-        output_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'output')
-        if not os.path.exists(output_dir):
-            ctk.CTkLabel(
-                reports_area,
-                text="No reports found. Generate analysis first.",
-                font=('Century Gothic', 14)
-            ).pack(pady=20)
-            return
+            output_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'output')
+            if not os.path.exists(output_dir):
+                ctk.CTkLabel(
+                    reports_area,
+                    text="No reports found. Generate analysis first.",
+                    font=('Century Gothic', 14)
+                ).pack(pady=20)
+                return
 
-        # Find all PNG files in the output directory
-        png_files = [f for f in os.listdir(output_dir) if f.lower().endswith('.png')]
+            # Find all PNG files in the output directory
+            png_files = [f for f in os.listdir(output_dir) if f.lower().endswith('.png')]
 
-        if not png_files:
-            ctk.CTkLabel(
-                reports_area,
-                text="No graph reports found. Generate analysis first.",
-                font=('Century Gothic', 14)
-            ).pack(pady=20)
-            return
+            if not png_files:
+                ctk.CTkLabel(
+                    reports_area,
+                    text="No graph reports found. Generate analysis first.",
+                    font=('Century Gothic', 14)
+                ).pack(pady=20)
+                return
 
-        # Create a 2-column grid layout for the images
-        reports_area.grid_columnconfigure(0, weight=1)
-        reports_area.grid_columnconfigure(1, weight=1)
+            # Create a 2-column grid layout for the images
+            reports_area.grid_columnconfigure(0, weight=1)
+            reports_area.grid_columnconfigure(1, weight=1)
 
-        # Load and display images in 2 columns
-        for i, filename in enumerate(png_files):
-            row = i // 2
-            col = i % 2
+            # Load and display images in 2 columns
+            for i, filename in enumerate(png_files):
+                row = i // 2
+                col = i % 2
 
-            # Create a frame for each image and its info
-            img_frame = ctk.CTkFrame(reports_area)
-            img_frame.grid(row=row, column=col, padx=10, pady=10, sticky="nsew")
+                # Create a frame for each image and its info
+                img_frame = ctk.CTkFrame(reports_area)
+                img_frame.grid(row=row, column=col, padx=10, pady=10, sticky="nsew")
 
-            # Add title
-            title = filename.replace('.png', '').replace('_', ' ').title()
-            ctk.CTkLabel(
-                img_frame,
-                text=title,
-                font=('Century Gothic', 12, 'bold')
-            ).pack(pady=(10, 5))
-
-            # Load and resize the image
-            img_path = os.path.join(output_dir, filename)
-            try:
-                img = Image.open(img_path)
-                # Resize while maintaining aspect ratio
-                img.thumbnail((300, 200))
-                ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=(300, 200))
-
-                # Display the image
-                img_label = ctk.CTkLabel(img_frame, image=ctk_img, text="")
-                img_label.pack(pady=5)
-                img_label.image = ctk_img  # Keep a reference to prevent garbage collection
-
-                # Add a view button
-                view_btn = ctk.CTkButton(
+                # Add title
+                title = filename.replace('.png', '').replace('_', ' ').title()
+                ctk.CTkLabel(
                     img_frame,
-                    text="View Full Size",
-                    command=lambda f=img_path: self.open_file_externally(f),
-                    width=120,
-                    font=('Century Gothic', 12)
-                )
-                view_btn.pack(pady=(5, 10))
-            except Exception as e:
-                error_label = ctk.CTkLabel(img_frame, text=f"Error loading image: {e}")
-                error_label.pack(pady=10)
+                    text=title,
+                    font=('Century Gothic', 12, 'bold')
+                ).pack(pady=(10, 5))
+
+                # Load and resize the image
+                img_path = os.path.join(output_dir, filename)
+                try:
+                    img = Image.open(img_path)
+                    # Resize while maintaining aspect ratio
+                    img.thumbnail((300, 200))
+                    ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=(300, 200))
+
+                    # Display the image
+                    img_label = ctk.CTkLabel(img_frame, image=ctk_img, text="")
+                    img_label.pack(pady=5)
+                    img_label.image = ctk_img  # Keep a reference to prevent garbage collection
+
+                    # Add a view button
+                    view_btn = ctk.CTkButton(
+                        img_frame,
+                        text="View Full Size",
+                        command=lambda f=img_path: self.open_file_externally(f),
+                        width=120,
+                        font=('Century Gothic', 12)
+                    )
+                    view_btn.pack(pady=(5, 10))
+                except Exception as e:
+                    error_label = ctk.CTkLabel(img_frame, text=f"Error loading image: {e}")
+                    error_label.pack(pady=10)
+
+        except Exception as e:
+            print(f"Error showing reports view: {e}")
+
+    def show_information(self):
+        """Show the Information search interface"""
+        try:
+            if hasattr(self, 'header'):
+                self.header.configure(text="Information Search")
+            self._clear_content()
+
+            # Create search frame
+            search_frame = ctk.CTkFrame(self.content_frame)
+            search_frame.pack(pady=20, padx=20, fill="x")
+
+            # Search label and entry
+            ctk.CTkLabel(search_frame, text="Enter Student ID:", font=('Century Gothic', 14)).pack(side="left", padx=10)
+            search_entry = ctk.CTkEntry(search_frame, placeholder_text="Student ID")
+            search_entry.pack(side="left", padx=10)
+
+            def search_student():
+                student_id = search_entry.get().strip()
+                try:
+                    student_id = int(student_id)
+                    student_data = self.binary_search_student(student_id)
+
+                    if student_data is not None:
+                        info = f"""
+Student Information:
+-------------------
+Student ID: {student_data['Student ID']}
+CT1: {student_data.get('CT1', 'N/A')}
+CT2: {student_data.get('CT2', 'N/A')}
+CT3: {student_data.get('CT3', 'N/A')}
+CT4: {student_data.get('CT4', 'N/A')}
+Mid-Term: {student_data.get('Mid-Term', 'N/A')}
+Presentation: {student_data.get('Presentation', 'N/A')}
+Attendance: {student_data.get('Attendance', 'N/A')}
+Grade: {self.result_analyzer.get_grade(student_data['Percentage']) if 'Percentage' in student_data else 'N/A'}
+"""
+                        messagebox.showinfo("Student Information", info)
+                    else:
+                        messagebox.showwarning("Not Found", "Student not found!")
+                except ValueError:
+                    messagebox.showerror("Error", "Please enter a valid Student ID (numbers only)")
+
+            # Search button
+            search_button = ctk.CTkButton(
+                search_frame,
+                text="Search",
+                command=search_student,
+                font=('Century Gothic', 14)
+            )
+            search_button.pack(side="left", padx=10)
+
+            # Instructions label
+            instruction_label = ctk.CTkLabel(
+                self.content_frame,
+                text="Enter a student ID and click Search to view their information.",
+                font=('Century Gothic', 12),
+                text_color="gray"
+            )
+            instruction_label.pack(pady=(10, 0))
+
+        except Exception as e:
+            print(f"Error showing information view: {e}")
+            if hasattr(self, 'status_label'):
+                self.status_label.configure(text=f"Error: {str(e)}")
+
+    def _clear_content(self):
+        """Safely clear the content frame"""
+        if hasattr(self, 'content_frame'):
+            for widget in self.content_frame.winfo_children():
+                widget.destroy()
 
     def analyze_results(self):
         """Analyze student results"""
@@ -1201,102 +1509,139 @@ class TeachersMenu:
         except Exception as e:
             self.status_label.configure(text=f"Error copying to clipboard: {str(e)}")
 
-    def show_student_info_view(self):
-        """Display all students information in a table frame from the database (DSA table)"""
-
-        self.header.configure(text="Student Information")
-        for widget in self.content_frame.winfo_children():
-            widget.destroy()
-        # Frame for sort dropdown
-        sort_frame = ctk.CTkFrame(self.content_frame)
-        sort_frame.pack(fill="x", padx=20, pady=(20, 0))
-        ctk.CTkLabel(sort_frame, text="Sort by:", font=("Century Gothic", 12)).pack(side="left", padx=(0,10))
-        sort_var = ctk.StringVar(value="Default")
-        sort_menu = ctk.CTkOptionMenu(sort_frame, variable=sort_var, values=["Default", "Ascending", "Descending"])
-        sort_menu.pack(side="left")
-        # Frame for table
-        table_frame = ctk.CTkFrame(self.content_frame)
-        table_frame.pack(fill="both", expand=True, padx=20, pady=20)
-        # Connect to student.db
-        db_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'student.db')
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
-        # Try to fetch all students from DSA table
+    def binary_search_student(self, student_id):
+        """Binary search implementation for finding student by ID"""
         try:
-            cursor.execute("SELECT * FROM DSA")
-            rows = cursor.fetchall()
-            columns = [desc[0] for desc in cursor.description]
+            df = pd.read_csv(self.data_file)
+            df = df.sort_values(by='Student ID')
+            student_ids = df['Student ID'].tolist()
+
+            left, right = 0, len(student_ids) - 1
+
+            while left <= right:
+                mid = (left + right) // 2
+                current_id = student_ids[mid]
+
+                if current_id == student_id:
+                    return df.iloc[mid]
+                elif current_id < student_id:
+                    left = mid + 1
+                else:
+                    right = mid - 1
+
+            return None
         except Exception as e:
-            ctk.CTkLabel(table_frame, text=f"Error loading students: {e}", font=("Century Gothic", 14)).pack(pady=20)
-            conn.close()
-            return
-        conn.close()
-        # Find percentage column index
-        try:
-            percentage_idx = columns.index("percentage")
-        except ValueError:
-            percentage_idx = None
-        def update_table(*args):
-            for item in tree.get_children():
-                tree.delete(item)
-            if sort_var.get() == "Default" or percentage_idx is None:
-                sorted_rows = rows  # Original order (serial)
-            else:
-                sorted_rows = self.merge_sort(rows, percentage_idx, reverse=(sort_var.get()=="Descending"))
-            for row in sorted_rows:
-                formatted_row = [f"{v:.2f}" if isinstance(v, float) else v for v in row]
-                tree.insert("", "end", values=formatted_row)
-            info_label.configure(text=f"Total students: {len(rows)}")
-        # Create Treeview
-        tree = ttk.Treeview(table_frame, columns=columns, show="headings")
-        for col in columns:
-            tree.heading(col, text=col.replace('_', ' ').title())
-            tree.column(col, anchor="w", width=120)
-        tree.pack(fill="both", expand=True)
-        # Add vertical scrollbar
-        vsb = ttk.Scrollbar(table_frame, orient="vertical", command=tree.yview)
-        tree.configure(yscrollcommand=vsb.set)
-        vsb.pack(side="right", fill="y")
-        # Add horizontal scrollbar
-        hsb = ttk.Scrollbar(table_frame, orient="horizontal", command=tree.xview)
-        tree.configure(xscrollcommand=hsb.set)
-        hsb.pack(side="bottom", fill="x")
-        # Info label
-        info_label = ctk.CTkLabel(table_frame, text=f"Total students: {len(rows)}", font=("Century Gothic", 12))
-        info_label.pack(anchor="w", pady=(10,0))
-        # Initial table load
-        update_table()
-        # Bind dropdown change
-        sort_var.trace_add('write', lambda *args: update_table())
+            messagebox.showerror("Error", f"Error searching for student: {str(e)}")
+            return None
 
-    def merge_sort(self, data, col_idx, reverse=False):
+    def merge_sort(self, data, idx, reverse=False):
+        """Merge sort implementation for sorting student data"""
         if len(data) <= 1:
             return data
-        mid = len(data) // 2
-        left = self.merge_sort(data[:mid], col_idx, reverse)
-        right = self.merge_sort(data[mid:], col_idx, reverse)
-        return self.merge(left, right, col_idx, reverse)
 
-    def merge(self, left, right, col_idx, reverse):
+        mid = len(data) // 2
+        left = self.merge_sort(data[:mid], idx, reverse)
+        right = self.merge_sort(data[mid:], idx, reverse)
+
+        return self.merge(left, right, idx, reverse)
+
+    def merge(self, left, right, idx, reverse=False):
+        """Merge two sorted lists"""
         result = []
         i = j = 0
+
         while i < len(left) and j < len(right):
-            l_val = left[i][col_idx]
-            r_val = right[j][col_idx]
+            # Handle None values
+            left_val = left[i][idx] if left[i][idx] is not None else float('-inf')
+            right_val = right[j][idx] if right[j][idx] is not None else float('-inf')
+
+            # Convert to float for comparison if possible
+            try:
+                left_val = float(left_val)
+                right_val = float(right_val)
+            except (ValueError, TypeError):
+                left_val = str(left_val)
+                right_val = str(right_val)
+
+            # Compare based on reverse flag
             if reverse:
-                if l_val > r_val:
-                    result.append(left[i])
-                    i += 1
-                else:
-                    result.append(right[j])
-                    j += 1
+                should_take_left = left_val > right_val
             else:
-                if l_val < r_val:
-                    result.append(left[i])
-                    i += 1
-                else:
-                    result.append(right[j])
-                    j += 1
+                should_take_left = left_val < right_val
+
+            if should_take_left:
+                result.append(left[i])
+                i += 1
+            else:
+                result.append(right[j])
+                j += 1
+
         result.extend(left[i:])
         result.extend(right[j:])
         return result
+
+
+    def show_information(self):
+        """Show the Information search interface"""
+        try:
+            if hasattr(self, 'header'):
+                self.header.configure(text="Information Search")
+            self._clear_content()
+
+            # Create search frame
+            search_frame = ctk.CTkFrame(self.content_frame)
+            search_frame.pack(pady=20, padx=20, fill="x")
+
+            # Search label and entry
+            ctk.CTkLabel(search_frame, text="Enter Student ID:", font=('Century Gothic', 14)).pack(side="left", padx=10)
+            search_entry = ctk.CTkEntry(search_frame, placeholder_text="Student ID")
+            search_entry.pack(side="left", padx=10)
+
+            def search_student():
+                student_id = search_entry.get().strip()
+                try:
+                    student_id = int(student_id)
+                    student_data = self.binary_search_student(student_id)
+
+                    if student_data is not None:
+                        info = f"""
+Student Information:
+-------------------
+Student ID: {student_data['Student ID']}
+CT1: {student_data.get('CT1', 'N/A')}
+CT2: {student_data.get('CT2', 'N/A')}
+CT3: {student_data.get('CT3', 'N/A')}
+CT4: {student_data.get('CT4', 'N/A')}
+Mid-Term: {student_data.get('Mid-Term', 'N/A')}
+Presentation: {student_data.get('Presentation', 'N/A')}
+Attendance: {student_data.get('Attendance', 'N/A')}
+Grade: {self.result_analyzer.get_grade(student_data['Percentage']) if 'Percentage' in student_data else 'N/A'}
+"""
+                        messagebox.showinfo("Student Information", info)
+                    else:
+                        messagebox.showwarning("Not Found", "Student not found!")
+                except ValueError:
+                    messagebox.showerror("Error", "Please enter a valid Student ID (numbers only)")
+
+            # Search button
+            search_button = ctk.CTkButton(
+                search_frame,
+                text="Search",
+                command=search_student,
+                font=('Century Gothic', 14)
+            )
+            search_button.pack(side="left", padx=10)
+
+            # Instructions label
+            instruction_label = ctk.CTkLabel(
+                self.content_frame,
+                text="Enter a student ID and click Search to view their information.",
+                font=('Century Gothic', 12),
+                text_color="gray"
+            )
+            instruction_label.pack(pady=(10, 0))
+
+        except Exception as e:
+            print(f"Error showing information view: {e}")
+            if hasattr(self, 'status_label'):
+                self.status_label.configure(text=f"Error: {str(e)}")

@@ -23,46 +23,23 @@ class ResultAnalyzer:
         try:
             # First try to load from database
             if self.db_manager.connect():
-                students = self.db_manager.get_all_students()
-                if students:
-                    # Convert the list of dictionaries to a DataFrame
-                    self.data = pd.DataFrame(students)
-                    # Rename columns to match expected format
-                    column_mapping = {
-                        'student_name': 'Student Name',
-                        'mid_term': 'Mid-Term',
-                        'presentation': 'Presentation',  # Explicitly map presentation column
-                        'best_3_CT_avg': 'Best_3_CT_Avg',
-                        'midterm_scaled': 'Midterm_Scaled',
-                        'total_obtained': 'Total_Obtained'
-                    }
-                    self.data.rename(columns=column_mapping, inplace=True)
-
-                    # Print column names to verify presentation column
-                    print(f"Columns after mapping: {self.data.columns.tolist()}")
-                    if 'Presentation' in self.data.columns:
-                        print(f"Presentation values found: {self.data['Presentation'].head(5)}")
-                    elif 'presentation' in self.data.columns:
-                        print(f"Lowercase presentation column found, mapping to Presentation")
-                        self.data['Presentation'] = self.data['presentation']
-
+                self.data = self.db_manager.get_all_students()
+                if self.data is not None and not self.data.empty:
                     print("Data loaded successfully from database")
                     self.db_manager.disconnect()
                     return True
-                self.db_manager.disconnect()
-
-            # If database loading fails, fall back to CSV file
-            if self.data_file and os.path.exists(self.data_file):
-                if self.data_file.endswith('.csv'):
-                    self.data = pd.read_csv(self.data_file)
-                elif self.data_file.endswith(('.xls', '.xlsx')):
-                    self.data = pd.read_excel(self.data_file)
                 else:
-                    raise ValueError("Unsupported file format. Please provide a CSV or Excel file.")
-                print(f"Data loaded successfully from {self.data_file}")
+                    print("No data found in database, trying CSV file")
+
+            # If database load fails, try CSV file
+            if self.data_file and os.path.exists(self.data_file):
+                self.data = pd.read_csv(self.data_file)
+                print("Data loaded successfully from CSV")
                 return True
             else:
-                raise ValueError("No data source available. Database is empty and CSV file not found.")
+                print("No valid data source found")
+                return False
+
         except Exception as e:
             print(f"Error loading data: {e}")
             return False
