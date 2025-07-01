@@ -120,12 +120,14 @@ class DatabaseManager:
         """
         try:
             # First check if we have data in the DSA table
+            # self.cursor.execute("DELETE FROM DSA")
+            # self.commit()
             self.cursor.execute("SELECT COUNT(*) FROM DSA")
             count = self.cursor.fetchone()[0]
 
-            if count > 0:
-                print("DSA table already contains data. Skipping import.")
-                return True, count
+            # if count > 0:
+            #     print("DSA table already contains data. Skipping import.")
+            #     return True, count
 
             # Read CSV file
             df = pd.read_csv(csv_file)

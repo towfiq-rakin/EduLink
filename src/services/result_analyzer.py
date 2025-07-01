@@ -104,7 +104,33 @@ class ResultAnalyzer:
         )
         
         self.processed_data['Percentage'] = (self.processed_data['Total_Obtained'] / 50) * 100
-        
+
+        # Update database with calculated values
+        try:
+            self.db_manager.connect()
+            for index, row in self.processed_data.iterrows():
+                student_id = row['Student ID'] if 'Student ID' in row else row['id']
+                update_query = """
+                UPDATE DSA SET 
+                    best_3_ct_avg = ?,
+                    midterm_scaled = ?,
+                    total_obtained = ?,
+                    percentage = ?
+                WHERE student_id = ?
+                """
+                self.db_manager.execute_query(update_query, (
+                    float(row['Best_3_CT_Avg']),
+                    float(row['Midterm_Scaled']),
+                    float(row['Total_Obtained']),
+                    float(row['Percentage']),
+                    int(student_id)
+                ))
+            self.db_manager.commit()
+            self.db_manager.disconnect()
+            print("Database updated with calculated values successfully")
+        except Exception as e:
+            print(f"Error updating database with calculated values: {e}")
+
         return self.processed_data
 
     def categorize_students(self):
@@ -151,6 +177,25 @@ class ResultAnalyzer:
         self.processed_data['Grade'] = self.processed_data['Percentage'].apply(get_grade)
         self.processed_data['Category'] = self.processed_data['Percentage'].apply(get_category)
         
+        # Update database with grades
+        try:
+            self.db_manager.connect()
+            for index, row in self.processed_data.iterrows():
+                student_id = row['Student ID'] if 'Student ID' in row else row['id']
+                update_query = """
+                UPDATE DSA SET grade = ?
+                WHERE student_id = ?
+                """
+                self.db_manager.execute_query(update_query, (
+                    row['Grade'],
+                    int(student_id)
+                ))
+            self.db_manager.commit()
+            self.db_manager.disconnect()
+            print("Database updated with grades successfully")
+        except Exception as e:
+            print(f"Error updating database with grades: {e}")
+
         return self.processed_data
 
     def generate_detailed_report(self):
