@@ -394,7 +394,7 @@ class TeachersMenu:
                 # Sort the data based on selection
                 sorted_rows = rows.copy()
                 if sort_var.get() != "Default":
-                    # Sort by percentage (index 12 in our query)
+                    # Sort by percentage (index 12 in our SELECT query)
                     percentage_idx = 12  # Index of percentage in our SELECT query
                     sorted_rows = self.merge_sort(sorted_rows, percentage_idx, reverse=(sort_var.get() == "Descending"))
 
@@ -565,27 +565,84 @@ class TeachersMenu:
                 student_id = search_entry.get().strip()
                 try:
                     student_id = int(student_id)
-                    student_data = self.binary_search_student(student_id)
+                    # Connect to database
+                    db_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'student.db')
+                    conn = sqlite3.connect(db_path)
+                    cursor = conn.cursor()
 
-                    if student_data is not None:
+                    # Query for the specific student
+                    cursor.execute("""
+                        SELECT 
+                            student_id, student_name, 
+                            CT1, CT2, CT3, CT4,
+                            mid_term,
+                            presentation,
+                            attendance,
+                            CASE 
+                                WHEN mid_term IS NOT NULL AND attendance IS NOT NULL AND presentation IS NOT NULL
+                                THEN (
+                                    (SELECT (
+                                        CASE 
+                                            WHEN COUNT(*) = 0 THEN 0
+                                            ELSE (
+                                                SELECT AVG(x)
+                                                FROM (
+                                                    SELECT x
+                                                    FROM (SELECT CT1 as x WHERE CT1 IS NOT NULL
+                                                          UNION ALL SELECT CT2 WHERE CT2 IS NOT NULL
+                                                          UNION ALL SELECT CT3 WHERE CT3 IS NOT NULL
+                                                          UNION ALL SELECT CT4 WHERE CT4 IS NOT NULL)
+                                                    ORDER BY x DESC
+                                                    LIMIT 3
+                                                )
+                                            )
+                                        END
+                                    )) + (mid_term / 2.0) + presentation + attendance
+                                ) * 100.0 / 50.0
+                                ELSE NULL 
+                            END as percentage
+                        FROM DSA WHERE student_id = ?
+                    """, (student_id,))
+
+                    result = cursor.fetchone()
+                    conn.close()
+
+                    if result:
+                        # Format the grade based on percentage
+                        percentage = result[10]  # Index 10 is the percentage
+                        grade = 'N/A'
+                        if percentage is not None:
+                            if percentage >= 90: grade = 'A+'
+                            elif percentage >= 80: grade = 'A'
+                            elif percentage >= 70: grade = 'B+'
+                            elif percentage >= 60: grade = 'B'
+                            elif percentage >= 50: grade = 'C+'
+                            elif percentage >= 40: grade = 'C'
+                            else: grade = 'F'
+
                         info = f"""
 Student Information:
 -------------------
-Student ID: {student_data['Student ID']}
-CT1: {student_data.get('CT1', 'N/A')}
-CT2: {student_data.get('CT2', 'N/A')}
-CT3: {student_data.get('CT3', 'N/A')}
-CT4: {student_data.get('CT4', 'N/A')}
-Mid-Term: {student_data.get('Mid-Term', 'N/A')}
-Presentation: {student_data.get('Presentation', 'N/A')}
-Attendance: {student_data.get('Attendance', 'N/A')}
-Grade: {self.result_analyzer.get_grade(student_data['Percentage']) if 'Percentage' in student_data else 'N/A'}
+Student ID: {result[0]}
+Name: {result[1]}
+CT1: {result[2] if result[2] is not None else 'N/A'}
+CT2: {result[3] if result[3] is not None else 'N/A'}
+CT3: {result[4] if result[4] is not None else 'N/A'}
+CT4: {result[5] if result[5] is not None else 'N/A'}
+Mid-Term: {result[6] if result[6] is not None else 'N/A'}
+Presentation: {result[7] if result[7] is not None else 'N/A'}
+Attendance: {result[8] if result[8] is not None else 'N/A'}
+Percentage: {f"{percentage:.2f}%" if percentage is not None else 'N/A'}
+Grade: {grade}
 """
                         messagebox.showinfo("Student Information", info)
                     else:
                         messagebox.showwarning("Not Found", "Student not found!")
                 except ValueError:
                     messagebox.showerror("Error", "Please enter a valid Student ID (numbers only)")
+                except Exception as e:
+                    messagebox.showerror("Error", f"Error searching for student: {str(e)}")
+                    print(f"Search error: {e}")
 
             # Search button
             search_button = ctk.CTkButton(
@@ -1601,27 +1658,84 @@ Grade: {self.result_analyzer.get_grade(student_data['Percentage']) if 'Percentag
                 student_id = search_entry.get().strip()
                 try:
                     student_id = int(student_id)
-                    student_data = self.binary_search_student(student_id)
+                    # Connect to database
+                    db_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'student.db')
+                    conn = sqlite3.connect(db_path)
+                    cursor = conn.cursor()
 
-                    if student_data is not None:
+                    # Query for the specific student
+                    cursor.execute("""
+                        SELECT 
+                            student_id, student_name, 
+                            CT1, CT2, CT3, CT4,
+                            mid_term,
+                            presentation,
+                            attendance,
+                            CASE 
+                                WHEN mid_term IS NOT NULL AND attendance IS NOT NULL AND presentation IS NOT NULL
+                                THEN (
+                                    (SELECT (
+                                        CASE 
+                                            WHEN COUNT(*) = 0 THEN 0
+                                            ELSE (
+                                                SELECT AVG(x)
+                                                FROM (
+                                                    SELECT x
+                                                    FROM (SELECT CT1 as x WHERE CT1 IS NOT NULL
+                                                          UNION ALL SELECT CT2 WHERE CT2 IS NOT NULL
+                                                          UNION ALL SELECT CT3 WHERE CT3 IS NOT NULL
+                                                          UNION ALL SELECT CT4 WHERE CT4 IS NOT NULL)
+                                                    ORDER BY x DESC
+                                                    LIMIT 3
+                                                )
+                                            )
+                                        END
+                                    )) + (mid_term / 2.0) + presentation + attendance
+                                ) * 100.0 / 50.0
+                                ELSE NULL 
+                            END as percentage
+                        FROM DSA WHERE student_id = ?
+                    """, (student_id,))
+
+                    result = cursor.fetchone()
+                    conn.close()
+
+                    if result:
+                        # Format the grade based on percentage
+                        percentage = result[10]  # Index 10 is the percentage
+                        grade = 'N/A'
+                        if percentage is not None:
+                            if percentage >= 90: grade = 'A+'
+                            elif percentage >= 80: grade = 'A'
+                            elif percentage >= 70: grade = 'B+'
+                            elif percentage >= 60: grade = 'B'
+                            elif percentage >= 50: grade = 'C+'
+                            elif percentage >= 40: grade = 'C'
+                            else: grade = 'F'
+
                         info = f"""
 Student Information:
 -------------------
-Student ID: {student_data['Student ID']}
-CT1: {student_data.get('CT1', 'N/A')}
-CT2: {student_data.get('CT2', 'N/A')}
-CT3: {student_data.get('CT3', 'N/A')}
-CT4: {student_data.get('CT4', 'N/A')}
-Mid-Term: {student_data.get('Mid-Term', 'N/A')}
-Presentation: {student_data.get('Presentation', 'N/A')}
-Attendance: {student_data.get('Attendance', 'N/A')}
-Grade: {self.result_analyzer.get_grade(student_data['Percentage']) if 'Percentage' in student_data else 'N/A'}
+Student ID: {result[0]}
+Name: {result[1]}
+CT1: {result[2] if result[2] is not None else 'N/A'}
+CT2: {result[3] if result[3] is not None else 'N/A'}
+CT3: {result[4] if result[4] is not None else 'N/A'}
+CT4: {result[5] if result[5] is not None else 'N/A'}
+Mid-Term: {result[6] if result[6] is not None else 'N/A'}
+Presentation: {result[7] if result[7] is not None else 'N/A'}
+Attendance: {result[8] if result[8] is not None else 'N/A'}
+Percentage: {f"{percentage:.2f}%" if percentage is not None else 'N/A'}
+Grade: {grade}
 """
                         messagebox.showinfo("Student Information", info)
                     else:
                         messagebox.showwarning("Not Found", "Student not found!")
                 except ValueError:
                     messagebox.showerror("Error", "Please enter a valid Student ID (numbers only)")
+                except Exception as e:
+                    messagebox.showerror("Error", f"Error searching for student: {str(e)}")
+                    print(f"Search error: {e}")
 
             # Search button
             search_button = ctk.CTkButton(
