@@ -3,6 +3,7 @@ from tkinter import Toplevel, messagebox, ttk
 import customtkinter as ctk
 from src.services.scholarship_service import ScholarshipService
 from src.services.scholarship_tree_visualizer import generate_scholarship_visualizations
+from src.utils.helpers import get_output_dir
 import pandas as pd
 from PIL import Image, ImageTk
 import tkinter as tk
@@ -104,6 +105,40 @@ class ScholarshipWindow:
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred: {str(e)}")
 
+    def show_tree_rules(self):
+        """Display the decision tree rules in a new window"""
+        rules_path = os.path.join(get_output_dir(), 'scholarship_tree_rules.txt')
+
+        if not os.path.exists(rules_path):
+            messagebox.showerror("Error", "Tree rules file not found!")
+            return
+
+        # Create new window for rules
+        rules_window = Toplevel(self.window)
+        rules_window.title("Scholarship Decision Tree Rules")
+        rules_window.geometry("800x600")
+
+        # Create text widget with scrollbar
+        text_frame = ctk.CTkFrame(rules_window)
+        text_frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+        text_widget = tk.Text(text_frame, wrap="none", font=('Courier', 12))
+        scrollbar_y = ttk.Scrollbar(text_frame, orient="vertical", command=text_widget.yview)
+        scrollbar_x = ttk.Scrollbar(text_frame, orient="horizontal", command=text_widget.xview)
+
+        text_widget.configure(yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set)
+
+        # Pack everything
+        scrollbar_y.pack(side="right", fill="y")
+        scrollbar_x.pack(side="bottom", fill="x")
+        text_widget.pack(side="left", fill="both", expand=True)
+
+        # Load and display the rules
+        with open(rules_path, 'r') as f:
+            rules_text = f.read()
+        text_widget.insert("1.0", rules_text)
+        text_widget.configure(state="disabled")  # Make read-only
+
     def add_visualization_buttons(self, visualization_results):
         """Add buttons to view different visualizations"""
         # Create visualization buttons frame
@@ -160,6 +195,15 @@ class ScholarshipWindow:
             font=('Century Gothic', 12)
         )
         comprehensive_btn.pack(side="left", padx=5, expand=True, fill="x")
+
+        # Add Rules Button
+        rules_btn = ctk.CTkButton(
+            button_frame,
+            text="View Decision Rules",
+            command=self.show_tree_rules,
+            font=('Century Gothic', 12)
+        )
+        rules_btn.pack(side="left", padx=5, expand=True, fill="x")
 
     def show_visualization(self, image_path, title):
         """Display visualization image in a new window"""
