@@ -20,6 +20,11 @@ class ScholarshipWindow:
 
         self.scholarship_service = ScholarshipService()
 
+        # Train the model on initialization
+        data = self.scholarship_service.load_and_prepare_data()
+        X, y = self.scholarship_service.prepare_training_data(data)
+        self.scholarship_service.train_model(X, y)
+
         # Main container frame
         self.main_frame = ctk.CTkFrame(self.window)
         self.main_frame.pack(fill="both", expand=True)
