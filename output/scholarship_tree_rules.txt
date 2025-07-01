@@ -1,13 +1,13 @@
 |--- normalized_sgpa <= 0.86
-|   |--- normalized_sgpa <= 0.68
-|   |   |--- class: 0
-|   |--- normalized_sgpa >  0.68
-|   |   |--- normalized_income <= 0.45
-|   |   |   |--- normalized_sgpa <= 0.82
-|   |   |   |   |--- class: 1
-|   |   |   |--- normalized_sgpa >  0.82
-|   |   |   |   |--- class: 2
-|   |   |--- normalized_income >  0.45
+|   |--- normalized_income <= 0.02
+|   |   |--- class: 1
+|   |--- normalized_income >  0.02
+|   |   |--- normalized_sgpa <= 0.82
+|   |   |   |--- normalized_sgpa <= 0.68
+|   |   |   |   |--- class: 0
+|   |   |   |--- normalized_sgpa >  0.68
+|   |   |   |   |--- class: 0
+|   |   |--- normalized_sgpa >  0.82
 |   |   |   |--- class: 0
 |--- normalized_sgpa >  0.86
 |   |--- normalized_sgpa <= 0.93

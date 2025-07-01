@@ -172,16 +172,21 @@ class ScholarshipService:
                     return 6000
                 return 0
 
-        #print("\nUsing trained decision tree model for decision making")
+        print("\nUsing trained decision tree model for decision making")
         # Normalize input data similar to training data
         normalized_sgpa = (sgpa - 0) / (4.0 - 0)  # SGPA is between 0-4
         normalized_income = (monthly_income - 10000) / (100000 - 10000)  # Income is between 10k-100k
 
+        # Create a DataFrame with named features for prediction
+        X = pd.DataFrame({
+            'normalized_sgpa': [normalized_sgpa],
+            'normalized_income': [normalized_income]
+        })
+
         # Make prediction using the model
-        X = np.array([[normalized_sgpa, normalized_income]])
         prediction = self.model.predict(X)[0]
-        # print(f"Input: SGPA={sgpa}, Income={monthly_income}")
-        # print(f"Normalized: SGPA={normalized_sgpa:.3f}, Income={normalized_income:.3f}")
-        # print(f"Model prediction index: {prediction}, Amount: {self.scholarship_amounts[prediction]} TK")
+        print(f"Input: SGPA={sgpa}, Income={monthly_income}")
+        print(f"Normalized: SGPA={normalized_sgpa:.3f}, Income={normalized_income:.3f}")
+        print(f"Model prediction index: {prediction}, Amount: {self.scholarship_amounts[prediction]} TK")
 
         return self.scholarship_amounts[prediction]
