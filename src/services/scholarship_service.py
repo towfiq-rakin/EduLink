@@ -11,9 +11,22 @@ class ScholarshipService:
     def __init__(self):
         self.model = DecisionTreeClassifier(max_depth=4, min_samples_split=5)
         self.total_budget = 0
-        # Database will be used to load student grades
         self.db_manager = DatabaseManager()
         self.scholarship_amounts = [0, 6000, 9000, 12000, 15000]  # Possible scholarship amounts
+        # Train model on initialization
+        self._ensure_model_trained()
+
+    def _ensure_model_trained(self):
+        """Ensure the model is trained with initial data"""
+        print("\nInitializing decision tree model...")
+        try:
+            data = self.load_and_prepare_data()
+            X, y = self.prepare_training_data(data)
+            print(f"Training model with {len(X)} samples...")
+            self.train_model(X, y)
+            print("Model training completed successfully")
+        except Exception as e:
+            print(f"Warning: Could not train model during initialization: {str(e)}")
 
     def load_and_prepare_data(self):
         """Load and prepare data from the student_grades table in the database"""
@@ -143,30 +156,32 @@ class ScholarshipService:
         Determine scholarship amount using the trained decision tree model.
         If model is not trained yet, falls back to rule-based decision.
         """
-        # If model is not trained yet, use rule-based decision
+        # If model is not trained yet, try to train it
         if not hasattr(self, 'model') or not hasattr(self.model, 'tree_'):
-            print("\nUsing rule-based (if-else) decision making")
-            if sgpa >= 3.9:
-                return 15000
-            elif sgpa >= 3.8:
-                return 9000
-            elif sgpa >= 3.75 and monthly_income < 50000:
-                return 12000
-            elif sgpa >= 3.5 and monthly_income < 50000:
-                return 6000
-            return 0
+            self._ensure_model_trained()
+            # If still not trained, use rule-based
+            if not hasattr(self.model, 'tree_'):
+                print("\nFalling back to rule-based (if-else) decision making")
+                if sgpa >= 3.9:
+                    return 15000
+                elif sgpa >= 3.8:
+                    return 9000
+                elif sgpa >= 3.75 and monthly_income < 50000:
+                    return 12000
+                elif sgpa >= 3.5 and monthly_income < 50000:
+                    return 6000
+                return 0
 
-        print("\nUsing trained decision tree model for decision making")
+        #print("\nUsing trained decision tree model for decision making")
         # Normalize input data similar to training data
-        # Note: Using simple min-max scaling since this is for a single record
         normalized_sgpa = (sgpa - 0) / (4.0 - 0)  # SGPA is between 0-4
         normalized_income = (monthly_income - 10000) / (100000 - 10000)  # Income is between 10k-100k
 
         # Make prediction using the model
         X = np.array([[normalized_sgpa, normalized_income]])
         prediction = self.model.predict(X)[0]
-        print(f"Input: SGPA={sgpa}, Income={monthly_income}")
-        print(f"Normalized: SGPA={normalized_sgpa:.3f}, Income={normalized_income:.3f}")
-        print(f"Model prediction index: {prediction}, Amount: {self.scholarship_amounts[prediction]} TK")
+        # print(f"Input: SGPA={sgpa}, Income={monthly_income}")
+        # print(f"Normalized: SGPA={normalized_sgpa:.3f}, Income={normalized_income:.3f}")
+        # print(f"Model prediction index: {prediction}, Amount: {self.scholarship_amounts[prediction]} TK")
 
         return self.scholarship_amounts[prediction]
